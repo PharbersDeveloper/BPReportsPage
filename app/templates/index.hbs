@@ -1,0 +1,353 @@
+<div class="bp-report">
+  {{#bp-column-layout classNames="report-container"}}
+    {{#bp-row-layout
+      classNames="report-header"
+      mainAxis="main-space-between"
+      crossAxis="cross-center"
+    }}
+      {{#bp-text tagName="h2" classNames="title-inverse"}}
+        报告名称
+      {{/bp-text}}
+      {{bp-date-picker
+        range=false
+        type="month"
+        endDate=endDate
+        confirmAction=changeDate
+        pid="date-picker"
+        style="white"
+        size="small"
+      }}
+    {{/bp-row-layout}}
+    {{#bp-row-layout
+      classNames="report-scrollview"
+      mainAxis="main-center"
+      crossAxis="cross-center"
+    }}
+      {{#bp-viewport
+        classNames=""
+        height="120px"
+        width="calc(100% - 48px)"
+        clickChange=false
+        vid="bp-viewport-test"
+        step="200"
+        row="true"
+      }}
+        {{#each productData as |item index|}}
+          {{#if (bp-eq index curIndex)}}
+          {{#bp-column-layout
+            classNames="report-product-card report-product-card-active"
+            click=(action "changeProd" item.PRODUCT_NAME index)
+          }}
+            {{#bp-text classNames="product-card-title"}}
+              {{item.PRODUCT_NAME}}
+            {{/bp-text}}
+            {{#bp-row-layout classNames="report-product-content"}}
+              {{#bp-column-layout classNames="product-ei-box"}}
+                {{#bp-text classNames="heading-xsmall product-ei-text"}}
+                  EI
+                {{/bp-text}}
+                {{#bp-text classNames="title product-ei-data"}}
+                  {{h-format-number item.EI 2}}
+                {{/bp-text}}
+              {{/bp-column-layout}}
+              {{#bp-column-layout classNames="product-sales-box"}}
+                {{#bp-row-layout classNames="product-sales-text-box"}}
+                  {{#bp-text classNames="heading-xsmall product-sales-text"}}
+                    产品销量
+                  {{/bp-text}}
+                  {{bp-product-card-tag index=index type="default" subtle=true}}
+                {{/bp-row-layout}}
+                    {{#bp-row-layout classNames="product-sales-data-box" }}
+                  {{#bp-text
+                    classNames="heading-medium product-sales-sata-number"
+                  }}
+                    {{h-format-mn item.PROD_SALES_IN_COMPANY_VALUE}}
+                  {{/bp-text}}{{#bp-text
+                    classNames="body-tertiary product-sales-data-mn"
+                  }}
+                    Mn
+                  {{/bp-text}}{{#product-sales-data-percent value=item.PROD_MOM
+                  }}
+                    {{h-format-number item.PROD_MOM 2}}%
+                  {{/product-sales-data-percent}}{{bp-icon
+                    value=item.PROD_MOM
+                    color=null
+                    iconSmall=true
+                  }}
+                {{/bp-row-layout}}
+              {{/bp-column-layout}}
+            {{/bp-row-layout}}
+          {{/bp-column-layout}}
+
+          {{else}}
+            {{#bp-column-layout
+              classNames="report-product-card"
+              click=(action "changeProd" item.PRODUCT_NAME index)
+            }}
+              {{#bp-text classNames="product-card-title"}}
+                {{item.PRODUCT_NAME}}
+              {{/bp-text}}{{#bp-row-layout classNames="report-product-content"}}
+                {{#bp-column-layout classNames="product-ei-box"}}
+                  {{#bp-text classNames="heading-xsmall product-ei-text"}}
+                    EI
+                  {{/bp-text}}{{#bp-text classNames="title product-ei-data"}}
+                    {{h-format-number item.EI 2}}
+                  {{/bp-text}}
+                {{/bp-column-layout}}{{#bp-column-layout
+                  classNames="product-sales-box"
+                }}
+                  {{#bp-row-layout classNames="product-sales-text-box"}}
+                    {{#bp-text classNames="heading-xsmall product-sales-text"}}
+                      产品销量
+                    {{/bp-text}}{{bp-product-card-tag
+                      index=index
+                      type="default"
+                      subtle=true
+                    }}
+                  {{/bp-row-layout}}{{#bp-row-layout
+                    classNames="product-sales-data-box"
+                  }}
+                    {{#bp-text
+                      classNames="heading-medium product-sales-sata-number"
+                    }}
+                      {{h-format-mn item.PROD_SALES_IN_COMPANY_VALUE}}
+                    {{/bp-text}}{{#bp-text
+                      classNames="body-tertiary product-sales-data-mn"
+                    }}
+                      Mn
+                    {{/bp-text}}{{#product-sales-data-percent
+                      value=item.PROD_MOM
+                    }}
+                      {{h-format-number item.PROD_MOM 2}}%
+                    {{/product-sales-data-percent}}{{bp-icon
+                      value=item.PROD_MOM
+                      color=null
+                      iconSmall=true
+                    }}
+                  {{/bp-row-layout}}
+                {{/bp-column-layout}}
+              {{/bp-row-layout}}
+            {{/bp-column-layout}}
+          {{/if}}
+       
+        {{/each}}
+      {{/bp-viewport}}
+    {{/bp-row-layout}}{{#bp-row-layout
+      classNames="report-map-scatter"
+      mainAxis="main-space-between"
+      crossAxis="cross-center"
+    }}
+      {{#bp-column-layout classNames="report-china-container"}}
+        {{#bp-row-layout
+          classNames="report-china-title"
+          crossAxis="cross-center"
+        }}
+          {{#bp-text classNames="heading-medium chart-title"}}
+            {{prodName}} | 所在市场省份分布
+          {{/bp-text}}{{#bp-text classNames="body-secondary chart-subtitle"}}
+            {{provName}}
+          {{/bp-text}}
+        {{/bp-row-layout}}{{!
+            <p>在ember-cli-build 中添加app.import('node_modules/echarts/map/js/china.js');</p>
+         }}
+        {{bp-china
+          eid="5e15ca980f84221d01409e63"
+          store=this.store
+          startDate=201801
+          endDate=endDate
+          prodName=prodName
+          onChangeProv=(action "changeProv")
+          confReqAdd="http://127.0.0.1:5555"
+        }}
+      {{/bp-column-layout}}
+      {{#bp-column-layout classNames="report-scatter-container"}}
+        {{#bp-row-layout
+          classNames="report-scatter-title"
+          crossAxis="cross-center"
+        }}
+          {{#bp-text classNames="heading-medium chart-title"}}
+            {{prodName}} | 所在市场城市概况
+          {{/bp-text}}
+          {{#bp-text classNames="body-secondary chart-subtitle"}}
+            {{provName}}
+          {{/bp-text}}
+        {{/bp-row-layout}}
+        {{bp-scatter
+          store=this.store
+          eid="5e15cc6a0f84221d01409e89"
+          startDate=startDate
+          endDate=endDate
+          currentProv=provName
+          onChangeCity=(action "changeCity")
+          confReqAdd="http://127.0.0.1:5555"
+        }}
+      {{/bp-column-layout}}
+    {{/bp-row-layout}}{{#bp-row-layout
+      classNames="report-table-bars"
+      mainAxis="main-space-between"
+      crossAxis="cross-flex-start"
+    }}
+      {{#bp-column-layout classNames="report-table-container"}}
+        {{#bp-column-layout
+          classNames="table-title-container"
+          mainAxis="main-center"
+        }}
+          {{#bp-text tagName="h3" classNames="heading-medium china-title"}}
+            产品地域发展详情
+          {{/bp-text}}{{#bp-text
+            tagName="p"
+            classNames="body-secondary table-subtitle"
+          }}
+            全国
+            {{#unless (bp-eq provName "全国")}}
+              ·{{provName}}
+            {{/unless}}
+            {{#unless (bp-eq cityName "")}}
+              ·{{cityName}}
+            {{/unless}}
+          {{/bp-text}}
+        {{/bp-column-layout}}
+        {{bp-table
+          confReqAdd="http://127.0.0.1:5555"
+          classNames="report-table-content"
+          tid="bp-table-test"
+          border=false
+          tableData=tableData
+        }}
+      {{/bp-column-layout}}{{#bp-column-layout
+        classNames="report-bars-container"
+      }}
+        {{#bp-column-layout classNames="bars-content"}}
+          {{#bp-column-layout
+            classNames="bars-title-container"
+            mainAxis="main-center"
+          }}
+            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+              {{prodName}} | 市场规模与产品销量发展情况
+            {{/bp-text}}{{#bp-text
+              tagName="p"
+              classNames=" body-secondary bars-subtitle"
+            }}
+              全国
+              {{#unless (bp-eq provName "全国")}}
+                ·{{provName}}
+              {{/unless}}
+              {{#unless (bp-eq cityName "")}}
+                ·{{cityName}}
+              {{/unless}}
+            {{/bp-text}}
+          {{/bp-column-layout}}
+          {{bp-stack
+            classNames="chart-bar-content"
+            store=this.store
+            eid="5e15cd240f84221d01409e96"
+            confReqAdd="http://127.0.0.1:5555"
+            provName=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prodName=prodName
+            chartData=firstStackQuery
+          }}
+        {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
+          {{#bp-column-layout
+            classNames="bars-title-container"
+            mainAxis="main-center"
+          }}
+            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+              {{prodName}} | 市场与产品发展趋势
+            {{/bp-text}}{{#bp-text
+              tagName="p"
+              classNames=" body-secondary bars-subtitle"
+            }}
+              全国
+              {{#unless (bp-eq provName "全国")}}
+                ·{{provName}}
+              {{/unless}}
+              {{#unless (bp-eq cityName "")}}
+                ·{{cityName}}
+              {{/unless}}
+            {{/bp-text}}
+          {{/bp-column-layout}}
+          {{bp-line
+            classNames="chart-bar-content"
+            store=this.store
+            eid="5e15cd7e0f84221d01409ea3"
+            confReqAdd="http://127.0.0.1:5555"
+            provName=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prodName=prodName
+            chartData=firstLineQuery
+          }}
+        {{/bp-column-layout}}
+        {{#bp-column-layout classNames="bars-content"}}
+          {{#bp-column-layout
+            classNames="bars-title-container"
+            mainAxis="main-center"
+          }}
+            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+              {{prodName}} | 市场内各分子份额变化
+            {{/bp-text}}{{#bp-text
+              tagName="p"
+              classNames=" body-secondary bars-subtitle"
+            }}
+              全国
+              {{#unless (bp-eq provName "全国")}}
+                ·{{provName}}
+              {{/unless}}
+              {{#unless (bp-eq cityName "")}}
+                ·{{cityName}}
+              {{/unless}}
+            {{/bp-text}}
+          {{/bp-column-layout}}
+          {{bp-stack
+            classNames="chart-bar-content"
+            store=this.store
+            eid="5e15cd830f84221d01409ea4"
+            confReqAdd="http://127.0.0.1:5555"
+            provName=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prodName=prodName
+            chartData=secondStackQuery
+          }}
+        {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
+          {{#bp-column-layout
+            classNames="bars-title-container"
+            mainAxis="main-center"
+          }}
+            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+              {{prodName}} | 所在市场内重点产品份额变化
+            {{/bp-text}}{{#bp-text
+              tagName="p"
+              classNames=" body-secondary bars-subtitle"
+            }}
+              全国
+              {{#unless (bp-eq provName "全国")}}
+                ·{{provName}}
+              {{/unless}}
+              {{#unless (bp-eq cityName "")}}
+                ·{{cityName}}
+              {{/unless}}
+            {{/bp-text}}
+          {{/bp-column-layout}}
+          {{bp-line
+            classNames="chart-bar-content"
+            store=this.store
+            eid="5e15cd870f84221d01409ea5"
+            confReqAdd="http://127.0.0.1:5555"
+            provName=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prodName=prodName
+            chartData=secondLineQuery
+          }}
+        {{/bp-column-layout}}
+      {{/bp-column-layout}}
+    {{/bp-row-layout}}
+  {{/bp-column-layout}}
+</div>
