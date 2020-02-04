@@ -1,3 +1,7 @@
+{{!-- <img src={{h-show-pic-oss "e59e5ab4-1f56-4b4d-a5fc-121b11ffbdbb" picOSS}} alt={{resource.name}}>
+<img src={{h-show-pic-oss "a329e277-c11a-48df-8f23-be7d1dd47b26" picOSS}} alt={{resource.name}}>
+<img src={{h-show-pic-oss "d1d409ec-26c8-46a4-b995-c82c761a58bb" picOSS}} alt={{resource.name}}> --}}
+
 <div class="bp-report">
   {{#bp-column-layout classNames="report-container"}}
     {{#bp-row-layout
@@ -34,51 +38,57 @@
       }}
         {{#each productData as |item index|}}
           {{#if (bp-eq index curIndex)}}
-          {{#bp-column-layout
-            classNames="report-product-card report-product-card-active"
-            click=(action "changeProd" item.PRODUCT_NAME index)
-          }}
-            {{#bp-text classNames="product-card-title"}}
-              {{item.PRODUCT_NAME}}
-            {{/bp-text}}
-            {{#bp-row-layout classNames="report-product-content"}}
-              {{#bp-column-layout classNames="product-ei-box"}}
-                {{#bp-text classNames="heading-xsmall product-ei-text"}}
-                  EI
-                {{/bp-text}}
-                {{#bp-text classNames="title product-ei-data"}}
-                  {{h-format-number item.EI 2}}
-                {{/bp-text}}
-              {{/bp-column-layout}}
-              {{#bp-column-layout classNames="product-sales-box"}}
-                {{#bp-row-layout classNames="product-sales-text-box"}}
-                  {{#bp-text classNames="heading-xsmall product-sales-text"}}
-                    产品销量
+            {{#bp-column-layout
+              classNames="report-product-card report-product-card-active"
+              click=(action "changeProd" item.PRODUCT_NAME index)
+            }}
+              {{#bp-text classNames="product-card-title"}}
+                {{item.PRODUCT_NAME}}
+              {{/bp-text}}
+              {{#bp-row-layout classNames="report-product-content"}}
+                {{#bp-column-layout classNames="product-ei-box"}}
+                  {{#bp-text classNames="heading-xsmall product-ei-text"}}
+                    EI
                   {{/bp-text}}
-                  {{bp-product-card-tag index=index type="default" subtle=true}}
-                {{/bp-row-layout}}
-                    {{#bp-row-layout classNames="product-sales-data-box" }}
-                  {{#bp-text
-                    classNames="heading-medium product-sales-sata-number"
-                  }}
-                    {{h-format-mn item.PROD_SALES_IN_COMPANY_VALUE}}
-                  {{/bp-text}}{{#bp-text
-                    classNames="body-tertiary product-sales-data-mn"
-                  }}
-                    Mn
-                  {{/bp-text}}{{#product-sales-data-percent value=item.PROD_MOM
-                  }}
-                    {{h-format-number item.PROD_MOM 2}}%
-                  {{/product-sales-data-percent}}{{bp-icon
-                    value=item.PROD_MOM
-                    color=null
-                    iconSmall=true
-                  }}
-                {{/bp-row-layout}}
-              {{/bp-column-layout}}
-            {{/bp-row-layout}}
-          {{/bp-column-layout}}
-
+                  {{#bp-text classNames="title product-ei-data"}}
+                    {{h-format-number item.EI 2}}
+                  {{/bp-text}}
+                {{/bp-column-layout}}
+                {{#bp-column-layout classNames="product-sales-box"}}
+                  {{#bp-row-layout classNames="product-sales-text-box"}}
+                    {{#bp-text classNames="heading-xsmall product-sales-text"}}
+                      产品销量
+                    {{/bp-text}}
+                    {{bp-product-card-tag
+                      index=index
+                      type="default"
+                      subtle=true
+                    }}
+                  {{/bp-row-layout}}
+                  {{#bp-row-layout classNames="product-sales-data-box"}}
+                    {{#bp-text
+                      classNames="heading-medium product-sales-sata-number"
+                    }}
+                      {{h-format-mn item.PROD_SALES}}
+                    {{/bp-text}}{{#bp-text
+                      classNames="body-tertiary product-sales-data-mn"
+                    }}
+                      Mn
+                    {{/bp-text}}
+                    {{#product-sales-data-percent
+                      value=item.MOM_RATE
+                    }}
+                      {{h-format-number item.MOM_RATE 2}}%
+                    {{/product-sales-data-percent}}
+                    {{bp-icon
+                      value=item.MOM_RATE
+                      color=null
+                      iconSmall=true
+                    }}
+                  {{/bp-row-layout}}
+                {{/bp-column-layout}}
+              {{/bp-row-layout}}
+            {{/bp-column-layout}}
           {{else}}
             {{#bp-column-layout
               classNames="report-product-card"
@@ -110,17 +120,17 @@
                     {{#bp-text
                       classNames="heading-medium product-sales-sata-number"
                     }}
-                      {{h-format-mn item.PROD_SALES_IN_COMPANY_VALUE}}
+                      {{h-format-mn item.PROD_SALES}}
                     {{/bp-text}}{{#bp-text
                       classNames="body-tertiary product-sales-data-mn"
                     }}
                       Mn
                     {{/bp-text}}{{#product-sales-data-percent
-                      value=item.PROD_MOM
+                      value=item.MOM_RATE
                     }}
-                      {{h-format-number item.PROD_MOM 2}}%
+                      {{h-format-number item.MOM_RATE 2}}%
                     {{/product-sales-data-percent}}{{bp-icon
-                      value=item.PROD_MOM
+                      value=item.MOM_RATE
                       color=null
                       iconSmall=true
                     }}
@@ -129,7 +139,6 @@
               {{/bp-row-layout}}
             {{/bp-column-layout}}
           {{/if}}
-       
         {{/each}}
       {{/bp-viewport}}
     {{/bp-row-layout}}{{#bp-row-layout
@@ -157,7 +166,6 @@
           endDate=endDate
           prodName=prodName
           onChangeProv=(action "changeProv")
-          confReqAdd="http://127.0.0.1:5555"
         }}
       {{/bp-column-layout}}
       {{#bp-column-layout classNames="report-scatter-container"}}
@@ -173,8 +181,8 @@
           {{/bp-text}}
         {{/bp-row-layout}}
         {{bp-scatter
-          store=this.store
           eid="5e15cc6a0f84221d01409e89"
+          store=this.store
           startDate=startDate
           endDate=endDate
           currentProv=provName
@@ -242,6 +250,7 @@
             store=this.store
             eid="5e15cd240f84221d01409e96"
             confReqAdd="http://127.0.0.1:5555"
+            compName=compName
             provName=provName
             cityName=cityName
             startDate="201801"
@@ -276,6 +285,7 @@
             confReqAdd="http://127.0.0.1:5555"
             provName=provName
             cityName=cityName
+            compName=compName
             startDate="201801"
             endDate=endDate
             prodName=prodName
@@ -307,6 +317,7 @@
             store=this.store
             eid="5e15cd830f84221d01409ea4"
             confReqAdd="http://127.0.0.1:5555"
+            compName=compName
             provName=provName
             cityName=cityName
             startDate="201801"
@@ -339,6 +350,7 @@
             store=this.store
             eid="5e15cd870f84221d01409ea5"
             confReqAdd="http://127.0.0.1:5555"
+            compName=compName
             provName=provName
             cityName=cityName
             startDate="201801"

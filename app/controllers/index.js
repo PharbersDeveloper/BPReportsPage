@@ -7,8 +7,8 @@ import { isEmpty } from '@ember/utils';
 
 export default Controller.extend({
     ajax: service(),
+    picOSS: service("pic-oss"),
     qa: "http://192.168.100.174:3000/sql",
-
     propertiesObserver: observer("endDate", "prodName", function () {
         this.set("provName", "全国")
         this.set("cityName", "")
@@ -20,20 +20,29 @@ export default Controller.extend({
         this.productQuery(this.endDate)
     }),
     productQuery(endDate) {
-        const queryDimensionSql = "SELECT PRODUCT_NAME, AVG(EI) AS EI, " +
-            "AVG(PROD_SALES_IN_COMPANY_VALUE) AS PROD_SALES_IN_COMPANY_VALUE, " +
-            "AVG(PROD_SALES_IN_COMPANY_RANK) AS PROD_SALES_IN_COMPANY_RANK, " +
-            "AVG(PROD_MOM) AS PROD_MOM FROM test2 WHERE COMPANY = " +
-            "'Sankyo' AND YM = " + endDate + " GROUP BY COMPANY.keyword, " +
-            "PRODUCT_NAME.keyword ORDER BY PROD_SALES_IN_COMPANY_RANK";
+        // const queryDimensionSql = "SELECT PRODUCT_NAME, AVG(EI) AS EI, " +
+        //     "AVG(PROD_SALES_IN_COMPANY_VALUE) AS PROD_SALES_IN_COMPANY_VALUE, " +
+        //     "AVG(PROD_SALES_IN_COMPANY_RANK) AS PROD_SALES_IN_COMPANY_RANK, " +
+        //     "AVG(PROD_MOM) AS PROD_MOM FROM test2 WHERE COMPANY = " +
+        //     "'Sankyo' AND YM = " + endDate + " GROUP BY COMPANY.keyword, " +
+        //     "PRODUCT_NAME.keyword ORDER BY PROD_SALES_IN_COMPANY_RANK";
 
-        return this.ajax.request(this.qa + '?tag=row2line&dimensionKeys=PRODUCT_NAME,EI,PROD_SALES_IN_COMPANY_VALUE,PROD_SALES_IN_COMPANY_RANK,PROD_MOM', {
+        const queryDimensionSql = "SELECT PRODUCT_NAME, AVG(EI_PROD_NATION) " +
+            "AS EI, AVG(CURR_PROD_SALES_IN_NATION) AS PROD_SALES, " +
+            "AVG(CURR_PROD_RANK_IN_NATION) AS RANK, AVG(MOM_RATE_ON_PROD_NATION) " +
+            "AS MOM_RATE FROM result WHERE COMPANY = 'Sankyo' AND DATE = " +
+            endDate + " GROUP BY COMPANY.keyword, PRODUCT_NAME.keyword ORDER BY RANK"
+        const queryParams = {
+            tag: "row2line",
+            dimensionKeys: "PRODUCT_NAME,EI,PROD_SALES,RANK,MOM_RATE"
+        }
+        return this.ajax.request(this.qa + `?tag=${queryParams.tag}&dimensionKeys=${queryParams.dimensionKeys}`, {
             method: 'POST',
             data: JSON.stringify({ "sql": queryDimensionSql }),
             dataType: 'json'
         }).then(data => {
             let keys = data.slice(0, 1)[0]
-            // ["PRODUCT_NAME", "EI", "PROD_SALES_IN_COMPANY_VALUE", "PROD_SALES_IN_COMPANY_RANK", "PROD_MOM"]
+            // ["PRODUCT_NAME", "EI", "PROD_SALES", "RANK", "MOM_RATE"]
             return data.slice(1).map(ele => {
 
                 return {
@@ -57,46 +66,47 @@ export default Controller.extend({
     endDate: "201906",
     provName: "全国",
     cityName: "",
+    // ADD
+    compName: "Sankyo",
     mss: A([]),
     mts: A([]),
     mcs: A([]),
     tableColumns: A([
         { name: "药品名", valuePath: "PRODUCT_NAME", isFixed: 'left', isSortable: false },
-        { name: "市场规模(Mn)", valuePath: "MKT_SALES_VALUE", isSortable: true,cellComponent:"format-mn" },
-        { name: "市场增长率", valuePath: "MKT_MOM", isSortable: true,cellComponent:"format-percentage"  },
-        { name: "产品销售量(Mn)", valuePath: "PROD_SALES_VALUE", isSortable: true ,cellComponent:"format-mn" },
-        { name: "产品市场份额", valuePath: "PROD_IN_CITY_SHARE", isSortable: true ,cellComponent:"format-percentage"},
-        { name: "产品销售增长率", valuePath: "PROD_MOM", isSortable: true,cellComponent:"format-percentage" },
-        { name: "EI", valuePath: "EI", isSortable: true,cellComponent: "format-decimal" }
+        { name: "市场规模(Mn)", valuePath: "MKT_SALES_VALUE", isSortable: true, cellComponent: "format-mn" },
+        { name: "市场增长率", valuePath: "MKT_MOM", isSortable: true, cellComponent: "format-percentage" },
+        { name: "产品销售量(Mn)", valuePath: "PROD_SALES_VALUE", isSortable: true, cellComponent: "format-mn" },
+        { name: "产品市场份额", valuePath: "PROD_IN_CITY_SHARE", isSortable: true, cellComponent: "format-percentage" },
+        { name: "产品销售增长率", valuePath: "PROD_MOM", isSortable: true, cellComponent: "format-percentage" },
+        { name: "EI", valuePath: "EI", isSortable: true, cellComponent: "format-decimal" }
     ]),
     tableData: computed("endDate", "prodName", "provName", "cityName", function () {
-        let endDate = this.endDate,
-            prodName = this.prodName,
-            provSql = this.provName === "全国" ? "" : " AND PROVINCE_NAME = '" + this.provName + "'",
-            citySql = this.cityName ? " AND CITY_NAME = '" + this.cityName + "'" : "",
+
+        let { endDate, provName, cityName, prodName, compName } = this,
+            selectScope = provName === "全国" ? "NATION" : cityName === "" ? "PROV" : "CITY",
+            provSql = this.provName === "全国" ? "" : " AND PROVINCE = '" + this.provName + "'",
+            citySql = this.cityName ? " AND CITY = '" + this.cityName + "'" : "",
             columns = [
-                { name: "药品名", valuePath: "PRODUCT_NAME", isFixed: 'left', isSortable: false },
-                { name: "市场规模(Mn)", valuePath: "MKT_SALES_VALUE", isSortable: true,cellComponent:"format-mn" },
-                { name: "市场增长率", valuePath: "MKT_MOM", isSortable: true,cellComponent:"format-percentage"  },
-                { name: "产品销售量(Mn)", valuePath: "PROD_SALES_VALUE", isSortable: true ,cellComponent:"format-mn"},
-                { name: "产品销售增长率", valuePath: "PROD_MOM", isSortable: true,cellComponent:"format-percentage" },
-                { name: "EI", valuePath: "EI", isSortable: true,cellComponent: "format-decimal" }
+                { name: "产品名称", valuePath: "PRODUCT_NAME", isFixed: 'left', isSortable: false },
+                { name: "市场规模(Mn)", valuePath: "MKT_SALES", isSortable: true, cellComponent: "format-mn" },
+                { name: "市场增长率", valuePath: "MKT_MOM", isSortable: true, cellComponent: "format-percentage" },
+                { name: "产品销售额(Mn)", valuePath: "PROD_SALES", isSortable: true, cellComponent: "format-mn" },
+                { name: "产品市场份额", valuePath: "PROD_SHARE", isSortable: true, cellComponent: "format-percentage" },
+                { name: "产品销售增长率", valuePath: "PROD_MOM", isSortable: true, cellComponent: "format-percentage" },
+                { name: "EI", valuePath: "EI", isSortable: true, cellComponent: "format-decimal" }
             ],
             rows = [],
-            queryDimensionSql = "SELECT PRODUCT_NAME, AVG(MKT_SALES_VALUE) " +
-                "AS MKT_SALES_VALUE, AVG(MKT_MOM) AS MKT_MOM, " +
-                "AVG(PROD_SALES_VALUE) AS PROD_SALES_VALUE, " +
-                "AVG(PROD_IN_CITY_SHARE) AS PROD_IN_CITY_SHARE, AVG(PROD_MOM) " +
-                "AS PROD_MOM, AVG(EI) AS EI FROM test2 WHERE MKT IN " +
-                "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
-                endDate + " AND PRODUCT_NAME = '" + prodName +
-                "') AND COMPANY = 'Sankyo' AND YM = " + endDate + provSql + citySql +
-                " GROUP BY PRODUCT_NAME.keyword",
+            queryDimensionSql = `SELECT PRODUCT_NAME, AVG(CURR_MKT_SALES_IN_${selectScope}) AS MKT_SALES, AVG(MOM_RATE_ON_MKT_${selectScope}) AS MKT_MOM, AVG(CURR_PROD_SALES_IN_${selectScope}) AS PROD_SALES, AVG(CURR_PROD_${selectScope}_SHARE) AS PROD_SHARE, AVG(MOM_RATE_ON_PROD_${selectScope}) AS PROD_MOM, AVG(EI_PROD_${selectScope}) AS EI FROM result WHERE MKT IN (SELECT MKT FROM result WHERE COMPANY = '${compName}' AND DATE = ${endDate} AND PRODUCT_NAME = '${prodName}') AND COMPANY = '${compName}' AND DATE = ${endDate} ${provSql} ${citySql} GROUP BY PRODUCT_NAME.keyword`,
             reqBody = {
                 "sql": queryDimensionSql
+            },
+            ec = {
+                tag: "row2line",
+                dimension: "PRODUCT_NAME,MKT_SALES,MKT_MOM,PROD_SALES,PROD_SHARE,PROD_MOM,EI"
             }
-        return this.ajax.request("http://192.168.100.174:3000/sql" + "?tag=row2line&dimensionKeys=PRODUCT_NAME,MKT_SALES_VALUE,MKT_MOM,PROD_SALES_VALUE,PROD_IN_CITY_SHARE,PROD_MOM,EI", {
 
+        return this.ajax.request("http://192.168.100.174:3000/sql" +
+            `?tag=${ec.tag}&dimensionKeys=${ec.dimension}`, {
             method: 'POST',
             data: JSON.stringify(reqBody),
             dataType: 'json'
@@ -124,44 +134,51 @@ export default Controller.extend({
     async firstLineQuery(condition, data) {
         const queryConfig = condition.query
         const qa = queryConfig.address;
-        const queryXSql = queryConfig.xSql;
+        let { compName, prodName, endDate, provName, cityName } = this;
+        const xSql = `SELECT YM FROM result WHERE COMPANY = '${this.compName}' GROUP BY DATE ORDER BY DATE`
+        // const queryXSql = queryConfig.xSql;
         const ec = condition.encode;
         const chartData = []
 
         const xValue = await this.ajax.request(qa + '?tag=array', {
             method: 'POST',
-            data: JSON.stringify({ "sql": queryXSql }),
+            data: JSON.stringify({ "sql": xSql }),
             dataType: 'json'
         })
         chartData.push(xValue)
-        // query dimension
-        // const productQueryList = await this.ajax.request(qa + '?tag=array', {
-        //         method: 'POST',
-        //         data: JSON.stringify({"sql":queryDimensionSql}),
-        //         dataType: 'json'
-        //     })
-        let provSql = this.provName === "全国" ? "" : " AND PROVINCE_NAME = '" + this.provName + "'"
-        let citySql = this.cityName ? " AND CITY_NAME = '" + this.cityName + "'" : ""
-        // TODO 新增加 code
+        let provSql = this.provName === "全国" ? "" : " AND PROVINCE = '" + provName + "'"
+        let citySql = this.cityName ? " AND CITY = '" + cityName + "'" : ""
+
         const productQueryList = [{
-            xAxis: "YM",
-            yAxis: "PROD_MOM",
+            xAxis: "DATE",
+            yAxis: "MOM_RATE",
             dimensionKeys: "PRODUCT_NAME",
-            sql: "SELECT YM, PRODUCT_NAME, AVG(PROD_MOM) AS PROD_MOM FROM " +
+            sqlOld: "SELECT YM, PRODUCT_NAME, AVG(PROD_MOM) AS PROD_MOM FROM " +
                 "test2 WHERE MKT IN (SELECT MKT FROM test2 WHERE COMPANY = " +
                 "'Sankyo' AND YM = " + this.endDate + " AND PRODUCT_NAME = '" +
                 this.prodName + "') AND COMPANY = 'Sankyo' " +
                 provSql + citySql + " AND PRODUCT_NAME.keyword = '" + this.prodName +
-                "' GROUP BY YM, PRODUCT_NAME.keyword"
+                "' GROUP BY YM, PRODUCT_NAME.keyword",
+            sql: "SELECT DATE, PRODUCT_NAME, AVG(MOM_RATE_ON_PROD_CITY) AS " +
+                "MOM_RATE FROM result WHERE MKT IN (SELECT MKT FROM result " +
+                "WHERE COMPANY = '" + compName + "' AND DATE = " + endDate +
+                " AND PRODUCT_NAME = '" + prodName + "') AND COMPANY = '" + compName +
+                "' " + provSql + citySql + " AND PRODUCT_NAME.keyword = '" + prodName +
+                "' GROUP BY DATE, PRODUCT_NAME.keyword"
         }, {
-            xAxis: "YM",
-            yAxis: "MKT_MOM",
+            xAxis: "DATE",
+            yAxis: "MOM_RATE",
             dimensionKeys: "MKT",
-            sql: "SELECT YM, MKT, AVG(MKT_MOM) AS MKT_MOM FROM test2 WHERE " +
+            sqlOld: "SELECT YM, MKT, AVG(MKT_MOM) AS MKT_MOM FROM test2 WHERE " +
                 "MKT IN (SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' " +
                 "AND YM = " + this.endDate + " AND PRODUCT_NAME = '" +
                 this.prodName + "') AND COMPANY = 'Sankyo' " +
-                provSql + citySql + " GROUP BY YM, MKT.keyword"
+                provSql + citySql + " GROUP BY YM, MKT.keyword",
+            sql: "SELECT DATE, MKT, AVG(MOM_RATE_ON_MKT_CITY) AS MOM_RATE" +
+                " FROM result WHERE MKT IN (SELECT MKT FROM result WHERE " +
+                "COMPANY = '" + compName + "' AND DATE = " + endDate +
+                " AND PRODUCT_NAME = '" + prodName + "') AND COMPANY = '" +
+                compName + "' " + provSql + citySql + " GROUP BY DATE, MKT.keyword"
         }]
 
         const allProdData = await all(productQueryList.map(ele => {
@@ -170,7 +187,6 @@ export default Controller.extend({
                 "x-values": xValue
             }
             return this.ajax.request(qa + '?tag=chart&x-axis=' + ele.xAxis + '&y-axis=' + ele.yAxis + '&dimensionKeys=' + ele.dimensionKeys, {
-
                 method: 'POST',
                 data: JSON.stringify(reqBody),
                 dataType: 'json'
@@ -201,26 +217,32 @@ export default Controller.extend({
 
     },
     async secondLineQuery(condition, data) {
-        let provSql = this.provName === "全国" ? "" : " AND PROVINCE_NAME = '" + this.provName + "'"
-        let citySql = this.cityName ? " AND CITY_NAME = '" + this.cityName + "'" : ""
-        let prodName = this.prodName
-        let endDate = this.endDate
+        let { provName, cityName, endDate, prodName, compName } = this
+        let provSql = provName === "全国" ? "" : " AND PROVINCE = '" + provName + "'"
+        let citySql = cityName ? " AND CITY = '" + cityName + "'" : ""
+        let selectScope = provName === "全国" ? "NATION" : cityName === "" ? "PROV" : "CITY"
+        const xSql = `SELECT YM FROM result WHERE COMPANY = '${compName}' GROUP BY DATE ORDER BY DATE`
 
         const queryConfig = condition.query
         const qa = queryConfig.address;
-        const queryXSql = queryConfig.xSql;
-        const queryDimensionSql = "SELECT PRODUCT_NAME from test2 WHERE MKT IN " +
-            "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
-            endDate + " AND PRODUCT_NAME = '" + prodName +
-            "') AND COMPANY = 'Sankyo' AND YM = " + endDate + " " +
-            provSql + citySql + " GROUP BY PRODUCT_NAME.keyword " +
-            "ORDER BY PROD_SALES_VALUE DESC LIMIT 10";
+        // const queryDimensionSql = "SELECT PRODUCT_NAME from test2 WHERE MKT IN " +
+        //     "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
+        //     endDate + " AND PRODUCT_NAME = '" + prodName +
+        //     "') AND COMPANY = 'Sankyo' AND YM = " + endDate + " " +
+        //     provSql + citySql + " GROUP BY PRODUCT_NAME.keyword " +
+        //     "ORDER BY PROD_SALES_VALUE DESC LIMIT 10";
+        let queryDimensionSql = "SELECT PRODUCT_NAME from result WHERE MKT IN " +
+            "(SELECT MKT FROM result WHERE COMPANY = '" + compName +
+            "' AND DATE = " + endDate + " AND PRODUCT_NAME = '" + prodName +
+            "') AND COMPANY = '" + compName + "' AND DATE = " + endDate +
+            provSql + citySql + " GROUP BY PRODUCT_NAME.keyword ORDER BY " +
+            `CURR_PROD_SALES_IN_${selectScope} DESC LIMIT 10`
         const ec = condition.encode;
         const chartData = []
 
         const xValue = await this.ajax.request(qa + '?tag=array', {
             method: 'POST',
-            data: JSON.stringify({ "sql": queryXSql }),
+            data: JSON.stringify({ "sql": xSql }),
             dataType: 'json'
         })
         chartData.push(xValue)
@@ -238,16 +260,22 @@ export default Controller.extend({
         prodQueryListStr = prodQueryListStr.slice(0, -1)
         function genConfig(prodQuery) {
             return {
-                xAxis: "YM",
-                yAxis: "PROD_IN_MKT_SHARE",
+                xAxis: "DATE",
+                yAxis: "PROD_SHARE",
                 dimensionKeys: "PRODUCT_NAME",
-                sql: "SELECT YM, PRODUCT_NAME, AVG(PROD_IN_MKT_SHARE) AS " +
+                sqlOld: "SELECT YM, PRODUCT_NAME, AVG(PROD_IN_MKT_SHARE) AS " +
                     "PROD_IN_MKT_SHARE FROM test2 WHERE MKT IN " +
                     "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
                     endDate + " AND PRODUCT_NAME = '" + prodName +
                     "') AND COMPANY = 'Sankyo' " + provSql + citySql +
                     " AND PRODUCT_NAME.keyword IN (" +
-                    prodQuery + ") GROUP BY YM, PRODUCT_NAME.keyword"
+                    prodQuery + ") GROUP BY YM, PRODUCT_NAME.keyword",
+                sql: `SELECT DATE, PRODUCT_NAME, AVG(CURR_PROD_${selectScope}_SHARE) ` +
+                    "AS PROD_SHARE FROM result WHERE MKT IN (SELECT MKT FROM " +
+                    `result WHERE COMPANY = '${compName}' AND DATE = ${endDate} ` +
+                    `AND PRODUCT_NAME = '${prodName}') AND COMPANY = '${compName}' ` +
+                    provSql + citySql + " AND PRODUCT_NAME.keyword IN ("+
+                    prodQuery + ") GROUP BY DATE, PRODUCT_NAME.keyword"
             }
         }
         let config = genConfig(prodQueryListStr)
@@ -285,17 +313,17 @@ export default Controller.extend({
             // 如果在内部，则将其提取到头部
             let currentProd = allProdData.find(prodData => prodData[0] === prodName);
             let index = allProdData.indexOf(currentProd)
-            allProdData.splice(index,1);
-            allProdData.splice(1,0,currentProd)
+            allProdData.splice(index, 1);
+            allProdData.splice(1, 0, currentProd)
         }
-        const newAllProdData =  allProdData.map((prod,index)=> {
-            if(index === 0) {
+        const newAllProdData = allProdData.map((prod, index) => {
+            if (index === 0) {
                 return prod
             }
-            return prod.map(ele=>{
-                if(typeof ele==="number") {
-                    return (100*ele).toFixed(2)
-                } 
+            return prod.map(ele => {
+                if (typeof ele === "number") {
+                    return (100 * ele).toFixed(2)
+                }
                 return ele
             })
         })
@@ -304,42 +332,42 @@ export default Controller.extend({
     async firstStackQuery(condition, data) {
         const queryConfig = condition.query
         const qa = queryConfig.address;
-        const queryXSql = queryConfig.xSql;
+        // const queryXSql = queryConfig.xSql;
         const ec = condition.encode;
         const chartData = []
-
+        const xSql = `SELECT YM FROM result WHERE COMPANY = '${this.compName}' GROUP BY DATE ORDER BY DATE`
+        // 每次都是返回最新的一年，需要修改
         const xValue = await this.ajax.request(qa + '?tag=array', {
             method: 'POST',
-            data: JSON.stringify({ "sql": queryXSql }),
+            data: JSON.stringify({ "sql": xSql }),
             dataType: 'json'
         })
         chartData.push(xValue)
-        let provSql = this.provName === "全国" ? "" : " AND PROVINCE_NAME = '" + this.provName + "'"
-        let citySql = this.cityName ? " AND CITY_NAME = '" + this.cityName + "'" : ""
+        let provSql = this.provName === "全国" ? "" : " AND PROVINCE = '" + this.provName + "'"
+        let citySql = this.cityName ? " AND CITY = '" + this.cityName + "'" : ""
         const productQueryList = [{
-            xAxis: "YM",
-            yAxis: "PROD_SALES_VALUE",
+            xAxis: "DATE",
+            yAxis: "PROD_SALES",
             dimensionKeys: "PRODUCT_NAME",
-            sql: "SELECT YM, PRODUCT_NAME, AVG(PROD_SALES_VALUE) AS " +
-                "PROD_SALES_VALUE FROM test2 WHERE MKT IN (SELECT MKT FROM " +
-                "test2 WHERE COMPANY = 'Sankyo' AND YM = " + this.endDate +
-                " AND PRODUCT_NAME = '" + this.prodName + "') AND COMPANY " +
-                "= 'Sankyo'" + provSql + citySql +
+            sql: "SELECT DATE, PRODUCT_NAME, AVG(CURR_PROD_SALES_IN_CITY) " +
+                "AS PROD_SALES FROM result WHERE MKT IN (SELECT MKT FROM " +
+                "result WHERE COMPANY = '" + this.compName +
+                "' AND DATE = " + this.endDate +
+                " AND PRODUCT_NAME = '" + this.prodName +
+                "') AND COMPANY = '" + this.compName + "' " + provSql + citySql +
                 " AND PRODUCT_NAME.keyword = '" + this.prodName +
-                "' GROUP BY YM, PRODUCT_NAME.keyword"
+                "' GROUP BY DATE, PRODUCT_NAME.keyword"
         }, {
-            xAxis: "YM",
-            yAxis: "MKT_SALES_VALUE",
+            xAxis: "DATE",
+            yAxis: "MKT_SALES",
             dimensionKeys: "MKT",
-            sql: "SELECT YM, MKT, AVG(MKT_SALES_VALUE) AS MKT_SALES_VALUE " +
-                "FROM test2 WHERE MKT IN (SELECT MKT FROM test2 WHERE COMPANY " +
-                "= 'Sankyo' AND YM = " + this.endDate + " AND PRODUCT_NAME = '" +
-                this.prodName + "') AND COMPANY = 'Sankyo' " + provSql +
-                citySql + " AND PRODUCT_NAME.keyword <> '" + this.prodName +
-                "' GROUP BY YM, MKT.keyword"
+            sql: "SELECT DATE, MKT, AVG(CURR_MKT_SALES_IN_CITY) AS MKT_SALES" +
+                " FROM result WHERE MKT IN (SELECT MKT FROM result WHERE " +
+                "COMPANY = '" + this.compName + "' AND DATE = " + this.endDate +
+                " AND PRODUCT_NAME = '" + this.prodName +
+                "') AND COMPANY = '" + this.compName +
+                "' " + provSql + citySql + " GROUP BY DATE, MKT.keyword"
         }]
-        // TODO 新增加 code
-
         const allProdData = await all(productQueryList.map(ele => {
             let reqBody = {
                 "sql": ele.sql,
@@ -360,66 +388,95 @@ export default Controller.extend({
         return chartData
     },
     async secondStackQuery(condition, data) {
-        let endDate = this.endDate
-        let prodName = this.prodName
-        let provSql = this.provName === "全国" ? "" : " AND PROVINCE_NAME = '" + this.provName + "'"
-        let citySql = this.cityName ? " AND CITY_NAME = '" + this.cityName + "'" : ""
+        let { provName, cityName, endDate, prodName, compName } = this
+        let provSql = provName === "全国" ? "" : " AND PROVINCE = '" + provName + "'"
+        let citySql = cityName ? " AND CITY = '" + cityName + "'" : ""
+        let selectScope = provName === "全国" ? "NATION" : cityName === "" ? "PROV" : "CITY"
 
         const queryConfig = condition.query
         const qa = queryConfig.address;
-        const queryXSql = queryConfig.xSql;
-        const queryDimensionSql = "SELECT MOLE_NAME FROM test2 WHERE MKT IN " +
-            "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
-            endDate + " AND PRODUCT_NAME = '" + prodName +
-            "') AND COMPANY = 'Sankyo' " + provSql + citySql +
-            " GROUP BY MOLE_NAME.keyword"
+        const xSql = `SELECT YM FROM result WHERE COMPANY = '${compName}' GROUP BY DATE ORDER BY DATE`
 
+        // let queryDimensionSql = "SELECT PRODUCT_NAME from result WHERE MKT IN " +
+        //     "(SELECT MKT FROM result WHERE COMPANY = '" + compName +
+        //     "' AND DATE = " + endDate + " AND PRODUCT_NAME = '" + prodName +
+        //     "') AND COMPANY = '" + compName + "' AND DATE = " + endDate +
+        //     provSql + citySql + " GROUP BY PRODUCT_NAME.keyword ORDER BY " +
+        //     `CURR_PROD_SALES_IN_${selectScope} DESC LIMIT 10`
         const ec = condition.encode;
         const chartData = []
 
         const xValue = await this.ajax.request(qa + '?tag=array', {
             method: 'POST',
-            data: JSON.stringify({ "sql": queryXSql }),
+            data: JSON.stringify({ "sql": xSql }),
             dataType: 'json'
         })
         chartData.push(xValue)
         // query dimension
-        const productQueryList = await this.ajax.request(qa + '?tag=array', {
+        // const productQueryList = await this.ajax.request(qa + '?tag=array', {
+        //     method: 'POST',
+        //     data: JSON.stringify({ "sql": queryDimensionSql }),
+        //     dataType: 'json'
+        // })
+
+        // const dealData = productQueryList.map(ele => {
+        //     return {
+        //         xAxis: "DATE",
+        //         yAxis: "MOLE_SHARE",
+        //         dimensionKeys: "MOLE_NAME",
+        //         sqlOld: "SELECT YM, MOLE_NAME, AVG(MOLE_IN_MKT_SHARE) AS " +
+        //             "MOLE_IN_MKT_SHARE FROM test2 WHERE MKT IN " +
+        //             "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' " +
+        //             "AND YM = " + endDate + " AND PRODUCT_NAME = '" + prodName +
+        //             "') AND COMPANY = 'Sankyo' " +
+        //             provSql + citySql + " AND MOLE_NAME.keyword = '" +
+        //             ele + "' GROUP BY YM, MOLE_NAME.keyword",
+        //         sql: `SELECT DATE, MOLE_NAME, AVG(CURR_MOLE_${selectScope}_SHARE) AS ` +
+        //             "MOLE_SHARE FROM result WHERE MKT IN (SELECT MKT FROM " +
+        //             "result WHERE COMPANY = '" + compName + "' AND DATE = " +
+        //             endDate + " AND PRODUCT_NAME = '" + prodName +
+        //             "') AND COMPANY = '" + compName + "' " + provSql + citySql +
+        //             " GROUP BY DATE, MOLE_NAME.keyword"
+        //     }
+        // })
+        const config = {
+            xAxis: "DATE",
+            yAxis: "MOLE_SHARE",
+            dimensionKeys: "MOLE_NAME",
+            sql: `SELECT DATE, MOLE_NAME, AVG(CURR_MOLE_${selectScope}_SHARE) AS ` +
+                "MOLE_SHARE FROM result WHERE MKT IN (SELECT MKT FROM " +
+                "result WHERE COMPANY = '" + compName + "' AND DATE = " +
+                endDate + " AND PRODUCT_NAME = '" + prodName +
+                "') AND COMPANY = '" + compName + "' " + provSql + citySql +
+                " GROUP BY DATE, MOLE_NAME.keyword"
+        }
+        let reqBody = {
+            "sql": config.sql,
+            "x-values": xValue
+        }
+        // const allProdData = await all(dealData.map(config => {
+
+        //     let reqBody = {
+        //         "sql": config.sql,
+        //         "x-values": xValue
+        //     }
+        //     return this.ajax.request(qa + '?tag=chart&x-axis=' + config.xAxis + '&y-axis=' + config.yAxis + '&dimensionKeys=' + config.dimensionKeys, {
+        //         method: 'POST',
+        //         data: JSON.stringify(reqBody),
+        //         dataType: 'json'
+        //     })
+        // }))
+        const prodData = await this.ajax.request(qa + '?tag=chart&x-axis=' + config.xAxis + '&y-axis=' + config.yAxis + '&dimensionKeys=' + config.dimensionKeys, {
             method: 'POST',
-            data: JSON.stringify({ "sql": queryDimensionSql }),
+            data: JSON.stringify(reqBody),
             dataType: 'json'
         })
-
-        const dealData = productQueryList.map(ele => {
-            return {
-                xAxis: "YM",
-                yAxis: "MOLE_IN_MKT_SHARE",
-                dimensionKeys: "MOLE_NAME",
-                sql: "SELECT YM, MOLE_NAME, AVG(MOLE_IN_MKT_SHARE) AS " +
-                    "MOLE_IN_MKT_SHARE FROM test2 WHERE MKT IN " +
-                    "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' " +
-                    "AND YM = " + endDate + " AND PRODUCT_NAME = '" + prodName +
-                    "') AND COMPANY = 'Sankyo' " +
-                    provSql + citySql + " AND MOLE_NAME.keyword = '" +
-                    ele + "' GROUP BY YM, MOLE_NAME.keyword"
-            }
-        })
-        const allProdData = await all(dealData.map(config => {
-
-            let reqBody = {
-                "sql": config.sql,
-                "x-values": xValue
-            }
-            return this.ajax.request(qa + '?tag=chart&x-axis=' + config.xAxis + '&y-axis=' + config.yAxis + '&dimensionKeys=' + config.dimensionKeys, {
-                method: 'POST',
-                data: JSON.stringify(reqBody),
-                dataType: 'json'
-            })
-        }))
-        allProdData.forEach(ele => {
-            chartData.push(ele[1])
+        prodData.shift()
+        prodData.forEach(ele => {
+            chartData.push(ele)
         })
         chartData[0].unshift(ec.x)
+
         return chartData
     },
     changeDate(date) {

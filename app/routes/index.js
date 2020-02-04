@@ -5,7 +5,7 @@ export default Route.extend({
     ajax: service(),
     qa: "http://192.168.100.174:3000/sql",
     model() {
-        const queryXSql = "SELECT YM FROM test2 WHERE COMPANY = 'Sankyo' GROUP BY YM ORDER BY YM";
+        const queryXSql = "SELECT YM FROM result WHERE COMPANY = 'Sankyo' GROUP BY DATE ORDER BY DATE";
         let months = [];
 
         return this.ajax.request(this.qa + '?tag=array', {
