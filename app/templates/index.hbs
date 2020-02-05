@@ -39,6 +39,7 @@
         {{#each productData as |item index|}}
           {{#if (bp-eq index curIndex)}}
             {{#bp-column-layout
+              mainAxis="main-space-between"
               classNames="report-product-card report-product-card-active"
               click=(action "changeProd" item.PRODUCT_NAME index)
             }}
@@ -91,6 +92,7 @@
             {{/bp-column-layout}}
           {{else}}
             {{#bp-column-layout
+              mainAxis="main-space-between" 
               classNames="report-product-card"
               click=(action "changeProd" item.PRODUCT_NAME index)
             }}

@@ -17,7 +17,7 @@ RUN npm update && \
 
 WORKDIR /app
 
-LABEL max-bi-v2.version=0.0.2
+LABEL max-bi-v2.version=0.0.3
 
 RUN git clone https://github.com/PharbersDeveloper/max-bi-v2.git && \
 	git clone https://github.com/PharbersDeveloper/basic-components.git
