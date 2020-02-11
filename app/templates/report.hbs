@@ -1,41 +1,4 @@
-<div class="bp-login">
-  {{#bp-row-layout classNames="login-container cross-stretch"}}
-    {{#bp-column-layout classNames="login-form"}}
-      {{#bp-text classNames="title"}}
-        MAX REPORT
-      {{/bp-text}}
-      {{html-container content=model.page}}
-      {{!-- {{bp-input classNames="login-input" placeholder="邮箱"}}
-      {{bp-input classNames="login-input" placeholder="密码" type="password"}}
-      {{#bp-button classNames="login-btn" block=true text="登录" icon=""}}{{/bp-button}} --}}
 
-      
-      {{#bp-row-layout
-        classNames="login-forget-password"
-        mainAxis="main-space-between"
-      }}
-        {{#bp-text classNames="login-fp-text"}}
-          忘记密码
-        {{/bp-text}}
-        {{#bp-row-layout classNames="login-into-ow" crossAxis="cross-center"}}
-          {{bp-img
-            classNames="login-logo"
-            src="/assets/favicon.jpg"
-            alt="pharbers logo"
-          }}
-          {{#bp-text classNames="login-fp-text"}}
-            进入法伯科技官网>
-          {{/bp-text}}
-        {{/bp-row-layout}}
-      {{/bp-row-layout}}
-    {{/bp-column-layout}}{{bp-img
-      classNames="login-img"
-      src="/assets/login-max.jpg"
-      alt="project description image"
-    }}
-  {{/bp-row-layout}}
-</div>
-{{!-- 
 <div class="bp-report">
   {{#bp-column-layout classNames="report-container"}}
     {{#bp-row-layout
@@ -192,7 +155,9 @@
           {{/bp-text}}{{#bp-text classNames="body-secondary chart-subtitle"}}
             {{provName}}
           {{/bp-text}}
-        {{/bp-row-layout}}
+        {{/bp-row-layout}}{{!
+            <p>在ember-cli-build 中添加app.import('node_modules/echarts/map/js/china.js');</p>
+         }}
         {{bp-china
           eid="5e15ca980f84221d01409e63"
           store=this.store
@@ -396,4 +361,4 @@
       {{/bp-column-layout}}
     {{/bp-row-layout}}
   {{/bp-column-layout}}
-</div> --}}
+</div>
