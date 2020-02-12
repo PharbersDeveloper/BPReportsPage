@@ -8,14 +8,16 @@ export default Service.extend({
 
     groupName: '',
     version: 'v0',
+    // online clientId 
     clientId: "5cb995a882a4a74375fa4201",
+    // local clientId -> redirectUri:...4200
+    // clientId: "5e43c0518c02f17e7d3c0b38",
     clientSecret: '5c90db71eeefcc082c0823b2',
     status: "self",
     scope: "APP/MAXBI",
     redirectUri: 'http://maxview.pharbers.com/oauth-callback',
     // redirectUri: 'http://maxview.pharbers.com:4200/oauth-callback',
     host: 'http://oauth.pharbers.com',
-    // host: 'http://192.168.100.116:9097',
 
     oauthOperation() {
         const ajax = this.get('ajax')
@@ -49,10 +51,9 @@ export default Service.extend({
 			resource = 'GenerateAccessToken',
 			url = '',
 			cookies = this.get('cookies');
-
 		const ajax = this.get('ajax'),
-			{ queryParams } = transition;
-
+            { queryParams } = transition;
+            
 		if (queryParams.code && queryParams.state) {
 			url = `?client_id=${this.get('clientId')}
 					&client_secret=${this.get('clientSecret')}
@@ -83,7 +84,7 @@ export default Service.extend({
 					this.get('router').transitionTo('report');
 				});
 		} else {
-			this.get('router').transitionTo('report');
+			this.get('router').transitionTo('index');
 		}
     },
 
@@ -136,8 +137,6 @@ export default Service.extend({
         this.cookies.clear("token_type", options)
         this.cookies.clear("scope", options)
         this.cookies.clear("expiry", options)
-        
-        window.console.log("clear cookies!");
     },
 
 });

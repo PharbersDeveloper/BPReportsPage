@@ -7,8 +7,6 @@ export function hShowPicOss(params/*, hash*/) {
 	if ( img ) {
 		let url = client.signatureUrl( "ow-resources/" + img )
 
-		// window.console.log( img )
-		window.console.log( url )
 		return url
 	} else {
 		return ""

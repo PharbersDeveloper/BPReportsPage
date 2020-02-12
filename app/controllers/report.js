@@ -17,6 +17,7 @@ export default Controller.extend({
         this.set("cityName", "")
     }),
     endDateObserver: observer("endDate", function () {
+        // TODO 取消会在初始化过程中执行。
         this.productQuery(this.endDate)
     }),
     productQuery(endDate) {
@@ -52,7 +53,7 @@ export default Controller.extend({
                     [keys[3]]: ele[3],
                     [keys[4]]: ele[4]
                 }
-            }).slice(0, 20)
+            })
         }).then(data => {
             this.set("productData", data)
             this.set("prodName", data[0]["PRODUCT_NAME"])
