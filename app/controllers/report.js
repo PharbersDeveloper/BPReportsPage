@@ -4,11 +4,13 @@ import { inject as service } from '@ember/service';
 import { all } from 'rsvp';
 import { computed, observer } from '@ember/object';
 import { isEmpty } from '@ember/utils';
+import ENV from "max-bi-v2/config/environment"
+
+const {host,port} = ENV.QueryAddress;
 
 export default Controller.extend({
     ajax: service(),
     picOSS: service("pic-oss"),
-    qa: "http://192.168.100.174:3000/sql",
     propertiesObserver: observer("endDate", "prodName", function () {
         this.set("provName", "全国")
         this.set("cityName", "")
@@ -21,12 +23,6 @@ export default Controller.extend({
         this.productQuery(this.endDate)
     }),
     productQuery(endDate) {
-        // const queryDimensionSql = "SELECT PRODUCT_NAME, AVG(EI) AS EI, " +
-        //     "AVG(PROD_SALES_IN_COMPANY_VALUE) AS PROD_SALES_IN_COMPANY_VALUE, " +
-        //     "AVG(PROD_SALES_IN_COMPANY_RANK) AS PROD_SALES_IN_COMPANY_RANK, " +
-        //     "AVG(PROD_MOM) AS PROD_MOM FROM test2 WHERE COMPANY = " +
-        //     "'Sankyo' AND YM = " + endDate + " GROUP BY COMPANY.keyword, " +
-        //     "PRODUCT_NAME.keyword ORDER BY PROD_SALES_IN_COMPANY_RANK";
 
         const queryDimensionSql = "SELECT PRODUCT_NAME, AVG(EI_PROD_NATION) " +
             "AS EI, AVG(CURR_PROD_SALES_IN_NATION) AS PROD_SALES, " +
@@ -37,7 +33,7 @@ export default Controller.extend({
             tag: "row2line",
             dimensionKeys: "PRODUCT_NAME,EI,PROD_SALES,RANK,MOM_RATE"
         }
-        return this.ajax.request(this.qa + `?tag=${queryParams.tag}&dimensionKeys=${queryParams.dimensionKeys}`, {
+        return this.ajax.request(`${host}:${port}/sql?tag=${queryParams.tag}&dimensionKeys=${queryParams.dimensionKeys}`, {
             method: 'POST',
             data: JSON.stringify({ "sql": queryDimensionSql }),
             dataType: 'json'
@@ -106,8 +102,7 @@ export default Controller.extend({
                 dimension: "PRODUCT_NAME,MKT_SALES,MKT_MOM,PROD_SALES,PROD_SHARE,PROD_MOM,EI"
             }
 
-        return this.ajax.request("http://192.168.100.174:3000/sql" +
-            `?tag=${ec.tag}&dimensionKeys=${ec.dimension}`, {
+        return this.ajax.request(`${host}:${port}/sql?tag=${ec.tag}&dimensionKeys=${ec.dimension}`, {
             method: 'POST',
             data: JSON.stringify(reqBody),
             dataType: 'json'

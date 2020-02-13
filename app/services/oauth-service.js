@@ -1,11 +1,12 @@
 import Service from '@ember/service';
 import { inject as service } from '@ember/service';
+import ENV from "max-bi-v2/config/environment"
 
+const { version, clientId, clientSecret, status, scope, host, redirectUri } = ENV.OAuth
 export default Service.extend({
     cookies: service(),
     ajax: service(),
     router: service(),
-
     groupName: '',
     version: 'v0',
     // online clientId 
@@ -21,24 +22,22 @@ export default Service.extend({
 
     oauthOperation() {
         const ajax = this.get('ajax')
-        let host = `${this.get('host')}`,
-            version = `${this.get('version')}`,
-            resource = 'ThirdParty',
+        let resource = 'ThirdParty',
             url = '';
 
-        url = `?client_id=${this.get('clientId')}
-                    &client_secret=${this.get('clientSecret')}
-                    &scope=${this.get('scope')}
-                    &status=${this.get('status')}
-                    &redirect_uri=${this.get('redirectUri')}`.
+        url = `?client_id=${clientId}
+                    &client_secret=${clientSecret}
+                    &scope=${scope}
+                    &status=${status}
+                    &redirect_uri=${redirectUri}`.
             replace(/\n/gm, '').
             replace(/ /gm, '').
             replace(/\t/gm, '');
         return ajax.request([host, version, resource, url].join('/'), {
             dataType: 'text'
-            }).then(response => {
-                return response;
-            })
+        }).then(response => {
+            return response;
+        })
             .catch(err => {
                 window.console.log('error');
                 window.console.log(err);
@@ -46,26 +45,24 @@ export default Service.extend({
     },
 
     oauthCallback(transition) {
-        let version = `${this.get('version')}`,
-            host = `${this.get('host')}`,
-			resource = 'GenerateAccessToken',
-			url = '',
-			cookies = this.get('cookies');
-		const ajax = this.get('ajax'),
+        let resource = 'GenerateAccessToken',
+            url = '',
+            cookies = this.get('cookies');
+        const ajax = this.get('ajax'),
             { queryParams } = transition;
-            
-		if (queryParams.code && queryParams.state) {
-			url = `?client_id=${this.get('clientId')}
-					&client_secret=${this.get('clientSecret')}
-					&scope=${this.get('scope')}
-					&redirect_uri=${this.get('redirectUri')}
+
+        if (queryParams.code && queryParams.state) {
+            url = `?client_id=${clientId}
+					&client_secret=${clientSecret}
+					&scope=${scope}
+					&redirect_uri=${redirectUri}
 					&code=${queryParams.code}
 					&state=${queryParams.state}`.
-				replace(/\n/gm, '').
-				replace(/ /gm, '').
-				replace(/\t/gm, '');
-			ajax.request([host, version, resource, url].join('/'))
-				.then(response => {
+                replace(/\n/gm, '').
+                replace(/ /gm, '').
+                replace(/\t/gm, '');
+            ajax.request([host, version, resource, url].join('/'))
+                .then(response => {
                     this.removeAuth();
                     let expiry = new Date(response.expiry);
                     let options = {
@@ -74,55 +71,55 @@ export default Service.extend({
                         expires: expiry
                     }
                     cookies.write('token', response.access_token, options);
-					cookies.write('account_id', response.account_id, options);
-					cookies.write('access_token', response.access_token, options);
-					cookies.write('refresh_token', response.refresh_token, options);
+                    cookies.write('account_id', response.account_id, options);
+                    cookies.write('access_token', response.access_token, options);
+                    cookies.write('refresh_token', response.refresh_token, options);
                     cookies.write('token_type', response.token_type, options);
                     cookies.write('scope', response.scope, options);
                     cookies.write('expiry', response.expiry, options);
 
-					this.get('router').transitionTo('report');
-				});
-		} else {
-			this.get('router').transitionTo('index');
-		}
+                    this.get('router').transitionTo('report');
+                });
+        } else {
+            this.get('router').transitionTo('index');
+        }
     },
 
     judgeAuth() {
         let tokenFlag = false;
         let scopeFlag = false;
-		let token = this.get('cookies').read('token');
+        let token = this.get('cookies').read('token');
         let scope = this.get('cookies').read('scope');
 
-		if(token != undefined && token != null && token != '') {
+        if (token != undefined && token != null && token != '') {
             tokenFlag = true;
         }
-        
-        if(scope != undefined && scope != null && scope != '') {
+
+        if (scope != undefined && scope != null && scope != '') {
             let scopeString = scope.split("/")[1];
             let scopes = scopeString.split(",");
             scopes.forEach(elem => {
                 let appScope = elem.split(":")[0];
                 let scopeGroup = elem.split(":")[1];
-                if(appScope == 'MAXBI' && scopeGroup != "" && scopeGroup != undefined) {
+                if (appScope == 'MAXBI' && scopeGroup != "" && scopeGroup != undefined) {
                     scopeFlag = true;
                 }
             });
             scope.split("/")[1].split(",").forEach(elem => {
                 let appScope = elem.split(":")[0];
                 let scopeGroup = elem.split(":")[1];
-                if(appScope == 'MAXBI' && scopeGroup != "" && scopeGroup != undefined) {
+                if (appScope == 'MAXBI' && scopeGroup != "" && scopeGroup != undefined) {
                     this.set('groupName', scopeGroup.split('#')[0]);
                 }
             });
         }
 
-        if(tokenFlag && scopeFlag) {
+        if (tokenFlag && scopeFlag) {
             return true;
-		} else {
+        } else {
             return false;
         }
-	},
+    },
 
     removeAuth() {
         this.set('groupName', '');

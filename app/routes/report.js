@@ -1,14 +1,15 @@
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
+import ENV from "max-bi-v2/config/environment"
 
 export default Route.extend({
     ajax: service(),
-    qa: "http://192.168.100.174:3000/sql",
+    qa: ENV.QueryAddress,
     model() {
         const queryXSql = "SELECT YM FROM result WHERE COMPANY = 'Sankyo' GROUP BY DATE ORDER BY DATE";
         let months = [];
-
-        return this.ajax.request(this.qa + '?tag=array', {
+        let {host,port} = this.qa;
+        return this.ajax.request(`${host}:${port}/sql?tag=array`, {
             method: 'POST',
             data: JSON.stringify({ "sql": queryXSql }),
             dataType: 'json'

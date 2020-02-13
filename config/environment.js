@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = function(environment) {
+module.exports = function (environment) {
   let ENV = {
     modulePrefix: 'max-bi-v2',
     environment,
@@ -20,15 +20,40 @@ module.exports = function(environment) {
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
+    },
+    scope: "APP/MAXBI",
+    redirectUri: 'http://maxview.pharbers.com/oauth-callback',
+    // redirectUri: 'http://maxview.pharbers.com:4200/oauth-callback',
+
+    OAuth: {
+      version: "v0",
+      // clientId: "5cb995a882a4a74375fa4201", //线上
+      clientId: "5e43c0518c02f17e7d3c0b38", //线下
+      clientSecret: "5c90db71eeefcc082c0823b2",
+      status: "self",
+      scope: "APP/MAXBI",
+      host: 'http://oauth.pharbers.com',
+      redirectUri: 'http://maxview.pharbers.com:4200/oauth-callback'
+    },
+    QueryAddress: {
+      host: "http://192.168.100.174",
+      port: 3000,
+      version: "",
+      db: ""
+    },
+    tableQueryAddress: {
+      host: "http://maxview.pharbers.com",
+      port: 80,
+      version: "",
+      db: ""
     }
   };
 
   if (environment === 'development') {
-    // ENV.APP.LOG_RESOLVER = true;
-    // ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
-    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.QueryAddress.host = "http://192.168.100.174"
+    ENV.QueryAddress.port = 3000
+    ENV.OAuth.clientId = "5e43c0518c02f17e7d3c0b38"
+    ENV.OAuth.redirectUri = 'http://maxview.pharbers.com:4200/oauth-callback'
   }
 
   if (environment === 'test') {
@@ -44,7 +69,10 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-    // here you can enable a production-specific feature
+    ENV.QueryAddress.host = "http://es-sql-server"
+    ENV.QueryAddress.port = 3000
+    ENV.OAuth.clientId = "5cb995a882a4a74375fa4201"
+    ENV.OAuth.redirectUri = 'http://maxview.pharbers.com/oauth-callback'
   }
 
   return ENV;
