@@ -21,9 +21,6 @@ module.exports = function (environment) {
       // Here you can pass flags/options to your application instance
       // when it is created
     },
-    scope: "APP/MAXBI",
-    redirectUri: 'http://maxview.pharbers.com/oauth-callback',
-    // redirectUri: 'http://maxview.pharbers.com:4200/oauth-callback',
 
     OAuth: {
       version: "v0",
@@ -38,12 +35,6 @@ module.exports = function (environment) {
     QueryAddress: {
       host: "http://192.168.100.174",
       port: 3000,
-      version: "",
-      db: ""
-    },
-    tableQueryAddress: {
-      host: "http://maxview.pharbers.com",
-      port: 80,
       version: "",
       db: ""
     }
@@ -69,7 +60,8 @@ module.exports = function (environment) {
   }
 
   if (environment === 'production') {
-    ENV.QueryAddress.host = "http://es-sql-server"
+    // ENV.QueryAddress.host = "es-sql-server"
+    ENV.QueryAddress.host = "http://59.110.31.215"
     ENV.QueryAddress.port = 3000
     ENV.OAuth.clientId = "5cb995a882a4a74375fa4201"
     ENV.OAuth.redirectUri = 'http://maxview.pharbers.com/oauth-callback'
