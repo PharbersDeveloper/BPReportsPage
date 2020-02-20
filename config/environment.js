@@ -41,7 +41,9 @@ module.exports = function (environment) {
   };
 
   if (environment === 'development') {
-    ENV.QueryAddress.host = "http://192.168.100.174"
+    // ENV.QueryAddress.host = "http://192.168.100.174"
+    ENV.QueryAddress.host = "http://59.110.31.215"
+
     ENV.QueryAddress.port = 3000
     ENV.OAuth.clientId = "5e43c0518c02f17e7d3c0b38"
     ENV.OAuth.redirectUri = 'http://maxview.pharbers.com:4200/oauth-callback'

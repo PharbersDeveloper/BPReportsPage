@@ -27,7 +27,7 @@ export default Controller.extend({
         const queryDimensionSql = "SELECT PRODUCT_NAME, AVG(EI_PROD_NATION) " +
             "AS EI, AVG(CURR_PROD_SALES_IN_NATION) AS PROD_SALES, " +
             "AVG(CURR_PROD_RANK_IN_NATION) AS RANK, AVG(MOM_RATE_ON_PROD_NATION) " +
-            "AS MOM_RATE FROM result WHERE COMPANY = 'Sankyo' AND DATE = " +
+            "AS MOM_RATE FROM result WHERE COMPANY = '"+this.compName+ "' AND DATE = " +
             endDate + " GROUP BY COMPANY.keyword, PRODUCT_NAME.keyword ORDER BY RANK"
         const queryParams = {
             tag: "row2line",
@@ -64,7 +64,8 @@ export default Controller.extend({
     provName: "全国",
     cityName: "",
     // ADD
-    compName: "Sankyo",
+    // compName: "Sankyo",
+    compName: "信立泰",
     mss: A([]),
     mts: A([]),
     mcs: A([]),
@@ -151,8 +152,8 @@ export default Controller.extend({
             dimensionKeys: "PRODUCT_NAME",
             sqlOld: "SELECT YM, PRODUCT_NAME, AVG(PROD_MOM) AS PROD_MOM FROM " +
                 "test2 WHERE MKT IN (SELECT MKT FROM test2 WHERE COMPANY = " +
-                "'Sankyo' AND YM = " + this.endDate + " AND PRODUCT_NAME = '" +
-                this.prodName + "') AND COMPANY = 'Sankyo' " +
+                "'"+this.compName +"' AND YM = " + this.endDate + " AND PRODUCT_NAME = '" +
+                this.prodName + "') AND COMPANY = '"+this.compName+"' " +
                 provSql + citySql + " AND PRODUCT_NAME.keyword = '" + this.prodName +
                 "' GROUP BY YM, PRODUCT_NAME.keyword",
             sql: "SELECT DATE, PRODUCT_NAME, AVG(MOM_RATE_ON_PROD_CITY) AS " +
@@ -166,9 +167,9 @@ export default Controller.extend({
             yAxis: "MOM_RATE",
             dimensionKeys: "MKT",
             sqlOld: "SELECT YM, MKT, AVG(MKT_MOM) AS MKT_MOM FROM test2 WHERE " +
-                "MKT IN (SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' " +
+                "MKT IN (SELECT MKT FROM test2 WHERE COMPANY = '"+this.compName+"' " +
                 "AND YM = " + this.endDate + " AND PRODUCT_NAME = '" +
-                this.prodName + "') AND COMPANY = 'Sankyo' " +
+                this.prodName + "') AND COMPANY = '"+this.compName+"' " +
                 provSql + citySql + " GROUP BY YM, MKT.keyword",
             sql: "SELECT DATE, MKT, AVG(MOM_RATE_ON_MKT_CITY) AS MOM_RATE" +
                 " FROM result WHERE MKT IN (SELECT MKT FROM result WHERE " +
@@ -221,12 +222,6 @@ export default Controller.extend({
 
         const queryConfig = condition.query
         const qa = queryConfig.address;
-        // const queryDimensionSql = "SELECT PRODUCT_NAME from test2 WHERE MKT IN " +
-        //     "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
-        //     endDate + " AND PRODUCT_NAME = '" + prodName +
-        //     "') AND COMPANY = 'Sankyo' AND YM = " + endDate + " " +
-        //     provSql + citySql + " GROUP BY PRODUCT_NAME.keyword " +
-        //     "ORDER BY PROD_SALES_VALUE DESC LIMIT 10";
         let queryDimensionSql = "SELECT PRODUCT_NAME from result WHERE MKT IN " +
             "(SELECT MKT FROM result WHERE COMPANY = '" + compName +
             "' AND DATE = " + endDate + " AND PRODUCT_NAME = '" + prodName +
@@ -259,13 +254,6 @@ export default Controller.extend({
                 xAxis: "DATE",
                 yAxis: "PROD_SHARE",
                 dimensionKeys: "PRODUCT_NAME",
-                sqlOld: "SELECT YM, PRODUCT_NAME, AVG(PROD_IN_MKT_SHARE) AS " +
-                    "PROD_IN_MKT_SHARE FROM test2 WHERE MKT IN " +
-                    "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' AND YM = " +
-                    endDate + " AND PRODUCT_NAME = '" + prodName +
-                    "') AND COMPANY = 'Sankyo' " + provSql + citySql +
-                    " AND PRODUCT_NAME.keyword IN (" +
-                    prodQuery + ") GROUP BY YM, PRODUCT_NAME.keyword",
                 sql: `SELECT DATE, PRODUCT_NAME, AVG(CURR_PROD_${selectScope}_SHARE) ` +
                     "AS PROD_SHARE FROM result WHERE MKT IN (SELECT MKT FROM " +
                     `result WHERE COMPANY = '${compName}' AND DATE = ${endDate} ` +
@@ -422,9 +410,9 @@ export default Controller.extend({
         //         dimensionKeys: "MOLE_NAME",
         //         sqlOld: "SELECT YM, MOLE_NAME, AVG(MOLE_IN_MKT_SHARE) AS " +
         //             "MOLE_IN_MKT_SHARE FROM test2 WHERE MKT IN " +
-        //             "(SELECT MKT FROM test2 WHERE COMPANY = 'Sankyo' " +
+        //             "(SELECT MKT FROM test2 WHERE COMPANY = '"+this.compName+"' " +
         //             "AND YM = " + endDate + " AND PRODUCT_NAME = '" + prodName +
-        //             "') AND COMPANY = 'Sankyo' " +
+        //             "') AND COMPANY = '"+this.compName+"' " +
         //             provSql + citySql + " AND MOLE_NAME.keyword = '" +
         //             ele + "' GROUP BY YM, MOLE_NAME.keyword",
         //         sql: `SELECT DATE, MOLE_NAME, AVG(CURR_MOLE_${selectScope}_SHARE) AS ` +

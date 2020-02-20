@@ -17,7 +17,7 @@ RUN npm update && \
 
 WORKDIR /app
 
-LABEL maxview.version=0.0.7
+LABEL maxview.version=0.0.8
 
 RUN git clone https://github.com/PharbersDeveloper/max-bi-v2.git && \
 	git clone https://github.com/PharbersDeveloper/basic-components.git
