@@ -68,6 +68,5 @@ module.exports = function (environment) {
     ENV.OAuth.clientId = "5cb995a882a4a74375fa4201"
     ENV.OAuth.redirectUri = 'http://maxview.pharbers.com/oauth-callback'
   }
-
   return ENV;
 };

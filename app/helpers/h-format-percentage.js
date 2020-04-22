@@ -14,7 +14,7 @@ export function hFormatPercentage(params/*, hash*/) {
 		return 0;
 	}
 
-	return `${str}%`;
+	return `${str}`;
 }
 
 export default helper(hFormatPercentage);

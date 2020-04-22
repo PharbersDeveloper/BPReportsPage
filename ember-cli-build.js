@@ -25,5 +25,6 @@ module.exports = function (defaults) {
   // echart
   app.import('node_modules/echarts/map/js/china.js');
 
+  app.import('node_modules/javascript-state-machine/lib/state-machine.js');
   return app.toTree();
 };

@@ -25,7 +25,6 @@
       crossAxis="cross-center"
     }}
       {{#bp-viewport
-        classNames=""
         height="120px"
         width="calc(100% - 48px)"
         clickChange=false
@@ -49,7 +48,7 @@
                     EI
                   {{/bp-text}}
                   {{#bp-text classNames="title product-ei-data"}}
-                    {{h-format-number item.EI 2}}
+                    {{h-format-percentage item.EI 2}}
                   {{/bp-text}}
                 {{/bp-column-layout}}
                 {{#bp-column-layout classNames="product-sales-box"}}
@@ -76,7 +75,7 @@
                     {{#product-sales-data-percent
                       value=item.MOM_RATE
                     }}
-                      {{h-format-number item.MOM_RATE 2}}%
+                      {{h-format-percentage item.MOM_RATE 2}}%
                     {{/product-sales-data-percent}}
                     {{bp-icon
                       value=item.MOM_RATE
@@ -100,7 +99,7 @@
                   {{#bp-text classNames="heading-xsmall product-ei-text"}}
                     EI
                   {{/bp-text}}{{#bp-text classNames="title product-ei-data"}}
-                    {{h-format-number item.EI 2}}
+                    {{h-format-percentage item.EI 2}}
                   {{/bp-text}}
                 {{/bp-column-layout}}{{#bp-column-layout
                   classNames="product-sales-box"
@@ -127,7 +126,7 @@
                     {{/bp-text}}{{#product-sales-data-percent
                       value=item.MOM_RATE
                     }}
-                      {{h-format-number item.MOM_RATE 2}}%
+                      {{h-format-percentage item.MOM_RATE 2}}%
                     {{/product-sales-data-percent}}{{bp-icon
                       value=item.MOM_RATE
                       color=null
@@ -158,7 +157,7 @@
         {{/bp-row-layout}}{{!
             <p>在ember-cli-build 中添加app.import('node_modules/echarts/map/js/china.js');</p>
          }}
-        {{bp-china
+        {{!-- {{bp-china
           eid="5e15ca980f84221d01409e63"
           store=this.store
           startDate=201801
@@ -166,6 +165,10 @@
           prodName=prodName
           compName=compName
           onChangeProv=(action "changeProv")
+        }} --}}
+        {{diagram-d3
+          eid="5e9eb4f4a9d14da0d86b2adf"
+          store=this.store
         }}
       {{/bp-column-layout}}
       {{#bp-column-layout classNames="report-scatter-container"}}
@@ -180,7 +183,7 @@
             {{provName}}
           {{/bp-text}}
         {{/bp-row-layout}}
-        {{bp-scatter
+        {{!-- {{bp-scatter
           eid="5e15cc6a0f84221d01409e89"
           store=this.store
           startDate=startDate
@@ -189,7 +192,10 @@
           compName=compName
           onChangeCity=(action "changeCity")
           confReqAdd="http://127.0.0.1:5555"
-        }}
+        }} --}}
+        {{diagram-d3
+          eid="5e9fb821c44f045878415ead"
+          store=this.store}}
       {{/bp-column-layout}}
     {{/bp-row-layout}}{{#bp-row-layout
       classNames="report-table-bars"
@@ -246,7 +252,7 @@
               {{/unless}}
             {{/bp-text}}
           {{/bp-column-layout}}
-          {{bp-stack
+          {{!-- {{bp-stack
             classNames="chart-bar-content"
             store=this.store
             eid="5e15cd240f84221d01409e96"
@@ -258,7 +264,18 @@
             endDate=endDate
             prodName=prodName
             chartData=firstStackQuery
-          }}
+          }} --}}
+          {{diagram-d3
+            classNames="chart-bar-content"
+            eid="5e9fe691c44f045878415eae"
+            store=this.store
+            updateData=this.firstStackUpdate
+            comp=compName
+            prov=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName}}
         {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
           {{#bp-column-layout
             classNames="bars-title-container"
@@ -279,7 +296,7 @@
               {{/unless}}
             {{/bp-text}}
           {{/bp-column-layout}}
-          {{bp-line
+          {{!-- {{bp-line
             classNames="chart-bar-content"
             store=this.store
             eid="5e15cd7e0f84221d01409ea3"
@@ -291,7 +308,18 @@
             endDate=endDate
             prodName=prodName
             chartData=firstLineQuery
-          }}
+          }} --}}
+          {{diagram-d3
+            classNames="chart-bar-content"
+            eid="5e9ffb16c44f045878415eaf"
+            store=this.store
+            updateData=this.firstLineUpdate
+            comp=compName
+            prov=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName}}
         {{/bp-column-layout}}
         {{#bp-column-layout classNames="bars-content"}}
           {{#bp-column-layout
@@ -313,7 +341,7 @@
               {{/unless}}
             {{/bp-text}}
           {{/bp-column-layout}}
-          {{bp-stack
+          {{!-- {{bp-stack
             classNames="chart-bar-content"
             store=this.store
             eid="5e15cd830f84221d01409ea4"
@@ -325,7 +353,18 @@
             endDate=endDate
             prodName=prodName
             chartData=secondStackQuery
-          }}
+          }} --}}
+          {{diagram-d3
+            classNames="chart-bar-content"
+            eid="5ea01392c44f045878415eb0"
+            store=this.store
+            updateData=this.secondStackUpdate
+            comp=compName
+            prov=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName}}
         {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
           {{#bp-column-layout
             classNames="bars-title-container"
