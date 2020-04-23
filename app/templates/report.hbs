@@ -169,6 +169,13 @@
         {{diagram-d3
           eid="5e9eb4f4a9d14da0d86b2adf"
           store=this.store
+          updateData=this.mapAndScatterUpdate
+            comp=compName
+            prov=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName
         }}
       {{/bp-column-layout}}
       {{#bp-column-layout classNames="report-scatter-container"}}
@@ -195,7 +202,14 @@
         }} --}}
         {{diagram-d3
           eid="5e9fb821c44f045878415ead"
-          store=this.store}}
+          store=this.store
+          updateData=this.mapAndScatterUpdate
+            comp=compName
+            prov=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName}}
       {{/bp-column-layout}}
     {{/bp-row-layout}}{{#bp-row-layout
       classNames="report-table-bars"
@@ -385,7 +399,7 @@
               {{/unless}}
             {{/bp-text}}
           {{/bp-column-layout}}
-          {{bp-line
+          {{!-- {{bp-line
             classNames="chart-bar-content"
             store=this.store
             eid="5e15cd870f84221d01409ea5"
@@ -397,7 +411,18 @@
             endDate=endDate
             prodName=prodName
             chartData=secondLineQuery
-          }}
+          }} --}}
+          {{diagram-d3
+            classNames="chart-bar-content"
+            eid="5ea023e1c44f045878415eb1"
+            store=this.store
+            updateData=this.secondLineUpdate
+            comp=compName
+            prov=provName
+            cityName=cityName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName}}
         {{/bp-column-layout}}
       {{/bp-column-layout}}
     {{/bp-row-layout}}

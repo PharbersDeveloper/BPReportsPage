@@ -147,24 +147,15 @@ class StackChart extends Histogram {
             max: max(data, (d) => max(d, (di) => di[1])),
         });
     }
-    // protected calcXaxisData() {
-    //     let originData = this.data.dataset
-    //     const timeDate = originData.map(datum => new Date(datum[this.xAxis.dimension]));
-    //     // 为了给两端留出空白区域
-    //     const phMinDate = timeMonth.offset(<Date>min(timeDate), -1);
-    //     const phMaxDate = timeMonth.offset(<Date>max(timeDate), 1);
-    //     this.xAxis = {
-    //         ...this.xAxis, ...{
-    //             min: phMinDate,
-    //             max: phMaxDate,
-    //         }
-    //     }
-    // }
     calcXaxisData() {
+        let longestXData = this.dataset.reduce((acc,cur)=> {
+            if(cur.length >= acc.length) {
+                acc = cur
+            }
+            return acc
+        },[]);
         this.xAxis = Object.assign(Object.assign({}, this.xAxis), {
-            data: this.dataset[0].map((item) => {
-                return item.data[this.fsm.state];
-            }),
+            data: longestXData.map(item => item.data[this.fsm.state]),
         });
     }
     mouseAction(svg) {

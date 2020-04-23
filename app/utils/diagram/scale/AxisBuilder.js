@@ -56,7 +56,10 @@ class AxisBuilder {
         // this.axisTransform(this.opt.position, grid)
     }
     formatAxis() {
-        let axis = this.getAxis(), option = this.opt, count = option.ticks || 10, formatter = option.formatter;
+        let axis = this.getAxis(), 
+            option = this.opt, 
+            count = option.ticks || 10, 
+            formatter = option.formatter;
         // https://github.com/xswei/d3-format#locale_format
         if (!formatter) {
             axis.ticks(count);
@@ -93,11 +96,11 @@ class AxisBuilder {
         // .range(range);
     }
     setScaleDomain(scale, option) {
-        let range = [0, 0], { padding, width, height } = this.grid, 
+        let range = [0, 0], 
+            { padding, width, height } = this.grid, 
             { offset, edgeWidth = 0, position, type, min, max, data } = option, 
             domain = [min, max];
-
-        console.log(padding)
+            
         switch (position) {
             case 'bottom':
             case 'top':
@@ -108,7 +111,6 @@ class AxisBuilder {
             default:
                 range = [height - padding.pt - offset - edgeWidth, padding.pb];
         }
-        console.log(range)
         switch (type) {
             case 'category':
                 scale = scale

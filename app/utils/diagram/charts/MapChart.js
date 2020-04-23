@@ -65,8 +65,6 @@ import { formatLocale, format } from 'd3-format';
  */
 class MapChart extends Histogram {
     constructor(opt) {
-        console.log("🍎")
-        console.log(opt)
         super(opt);
         this.fsm = null;
         let dimensions = this.dimensions, initFsmData = dimensions.reduce((acc, cur) => {
@@ -89,10 +87,12 @@ class MapChart extends Histogram {
         super.draw(selection);
         // 将 svg 容器放到全局,供 update 使用
         this.selection = selection;
-        let grid = this.grid;
-        let svg = selection.append('svg')
-            .attr('width', grid.width)
-            .attr('height', grid.height);
+        let grid = this.grid,
+            svg = selection.append('svg')
+                .attr('width', grid.width)
+                .attr('height', grid.height)
+                .classed('svg', true);
+
         this.tooltip = new D3Tooltip(selection, 'b-tooltip');
         async function flow() {
             await this.requeryData(this.updateData);
@@ -138,31 +138,16 @@ class MapChart extends Histogram {
                 });
                 self.updateChart(selection);
             }
-            // if (fsm.state === 'province') {
-            //     fsm.scrollup()
-            // } else {
-            //     fsm.drilldown()
-            // }
-            // self.updateChart(selection);
-            // 修改 fsm 的 data-以便获取数据的时候可以得知维度信息
-            // 修改坐标轴的 dimension 
-            // self.geo.dimension = fsm.state
         });
     }
     drawMap(svg) {
         let { grid, property: p, geo, dataset, fsm, dimensions } = this;
-        // const tooltipIns = new D3Tooltip(container, 'map-tooltip')
 
         const maxData = max(dataset.map((datum) => datum[geo.dimension]));
         // const minData = min(dataset.map((datum: any[]) => datum[geo.dimension]))
         const color = scaleLinear()
             .domain([0, maxData])
-            .range(['#B8D4FA', '#18669A']);
-        // .range(["#E7F0FE","#B8D4FA","#8ABCF4","#5CA6EF",
-        //     "#3492E5",
-        //     "#1E7EC8",
-        //     "#18669A"
-        // ])
+            .range(p.colorPool.map(color => color.HEX()));
         this.showRect(svg)
         if (fsm.state === dimensions[0]) {
             return xml("../assets/json/southchinasea.svg").then(xmlDocument => {
@@ -226,11 +211,11 @@ class MapChart extends Histogram {
                     });
             });
         }
-
     }
     showRect(svg) {
-        let { grid, property: p, geo, dataset, fsm, dimensions } = this;
-        const maxData = max(dataset.map((datum) => datum[geo.dimension]));
+        let { grid, property: p, geo, dataset } = this,
+            colors = p.colorPool.map(color => color.HEX()),
+            maxData = max(dataset.map((datum) => datum[geo.dimension]));
 
         // 显示渐变矩形条
         const linearGradient = svg.append("defs")
@@ -244,11 +229,11 @@ class MapChart extends Histogram {
         // //设置矩形条开始颜色
         linearGradient.append("stop")
             .attr("offset", "0%")
-            .attr("stop-color", '#8ABCF4');
+            .attr("stop-color", colors[0]);
         // //设置结束颜色
         linearGradient.append("stop")
             .attr("offset", "100%")
-            .attr("stop-color", '#18669A');
+            .attr("stop-color", colors[colors.length - 1]);
         svg.append("rect")
             //x,y 矩形的左上角坐标
             .attr("x", 24)
@@ -258,22 +243,22 @@ class MapChart extends Histogram {
             .attr("height", 83)
             //引用上面的id 设置颜色
             .style("fill", "url(#" + linearGradient.attr("id") + ")");
-        // //设置文字
-        // // 数据初值
+        // 设置文字
+        // 数据初值
         svg.append("text")
-            .attr("x", grid.padding.pl + 16 + 8)
+            .attr("x", grid.padding.pl + 32)
             .attr("y", grid.height - grid.padding.pb)
             .text(0)
             .classed("linear-text", true);
-        // // visualMap title
+        // visualMap title
         svg.append("text")
             .attr("x", grid.padding.pl)
             .attr("y", grid.height - 83 - grid.padding.pb - 8) // 8为padding
             .text('市场规模')
             .classed("linear-text", true);
-        // //数据末值
+        // 数据末值
         svg.append("text")
-            .attr("x", grid.padding.pl + 16 + 8)
+            .attr("x", grid.padding.pl + 32)
             .attr("y", grid.height - 83 - grid.padding.pb + 12) // 12 为字体大小
             .text(format("~s")(maxData))
             .classed("linear-text", true)
@@ -283,26 +268,30 @@ class MapChart extends Histogram {
             { pl, pr } = grid.padding,
             leftBlank = pl,
             curDimensions = [fsm.state];
-
         svg.selectAll("path").on('mousemove', function (d) {
             const curSelect = select(this);
             curSelect.classed('path-active', true);
-            let prov = d.properties.name, 
-                curData = dataset.find((provData) => prov.includes(provData[curDimensions[0]]));
-            let p = clientPoint(this, event);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(p);
+            let prov = d.properties.name,
+                curData = dataset.find(provData => prov.includes(provData[curDimensions[0]]));
+            let point = clientPoint(this, event),
+                // 可自定义 legend 通过此方式
+                preLegend = {
+                content(data, dimensions) {
+                    if (!data) {
+                        return `<p>本市场暂无数据</p>`;
+                    }
+                    return `
+                            <p>${data[dimensions[0]]} 市场概况</p>
+                            <p>市场规模 ${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
+                            <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
+                            <!-- <p>sales ${format(".2%")(data['sales'])}</p> -->`;
+                }
+            }
+            p.legend = Object.assign(preLegend,p.legend);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(function (data, dimensions) {
-                if (!data) {
-                    return `<p>本市场暂无数据</p>`;
-                }
-                return `
-                        <p>${data[dimensions[0]]} 市场概况</p>
-                        <p>市场规模${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
-                        <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
-                        <!-- <p>sales ${format(".2%")(data['sales'])}</p> -->`;
-            });
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent( p.legend.content);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.selectAll("path").on('mouseout', function () {

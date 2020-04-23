@@ -142,26 +142,12 @@ class ScatterChart extends Histogram {
                 .transition(t)
                 .duration(1600)
                 .attr('r', () => dataScale(d[polar.dimension]) ? dataScale(d[polar.dimension]) * 1.4 : 7);
-            // tooltipIns.setCurData(d);
-            // tooltipIns.getTooltip()
-            //     .classed("d-none", false);
-            // tooltipIns.setContent(function (data: any) {
-            //     if (!data) {
-            //         return `<p>暂无数据</p>`
-            //     }
-            //     return `<p>${ data[0]}</p>
-            //             <p>产品销量${formatLocale("thousands").format("~s")(data[3])}</p>
-            //             <p>产品销量增长率 ${format(".2%")(data[2])}</p>
-            //             <p>市场增长率 ${format(".2%")(data[1])}</p>`
-            // })
+            
         }).on('mouseout', function (d) {
             select(this)
                 .transition(t)
                 .duration(1200)
                 .attr('r', () => dataScale(d[polar.dimension]));
-            // container.select('.scatter-tooltip')
-            //     .classed("d-none", true)
-            // selectAll('p').remove()
         });
     }
     getAxisMaxValue(data, property) {
@@ -204,20 +190,25 @@ class ScatterChart extends Histogram {
             //     .attr('r', () => dataScale(d[polar.dimension])?dataScale(d[polar.dimension]) * 1.4: 7);
             const curSelect = select(this);
             curSelect.classed('path-active', true);
-            let p = clientPoint(this, event);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(p);
+            let point = clientPoint(this, event),
+                // 可自定义 legend 通过此方式
+                preLegend = {
+                    content(data, dimensions) {
+                        if (!data) {
+                            return `<p>本市场暂无数据</p>`;
+                        }
+                        return `
+                                <p>${data[dimensions[0]]} 市场概况</p>
+                                <p>市场规模 ${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
+                                <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>`;
+                    }
+                };
+            p.legend = Object.assign(preLegend,p.legend);
+            console.log(point)
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(d);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(function (data, dimensions) {
-                if (!data) {
-                    return `<p>本市场暂无数据</p>`;
-                }
-                return `
-                        <p>${data[dimensions[0]]} 市场概况</p>
-                        <p>市场规模${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
-                        <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
-                        <!-- <p>sales ${format(".2%")(data['sales'])}</p> -->`;
-            });
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.selectAll("circle").on('mouseout', function () {

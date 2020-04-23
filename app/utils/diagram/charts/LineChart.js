@@ -49,8 +49,6 @@ class LineChart extends Histogram {
             // 画 lines
             this.drawLines(svg);
             // 有了原始数据后,画legend
-        console.log(this.dataset)
-
             let legendData = this.formatLegendData(this.data.dataset);
             this.legend = new D3Legend(svg, legendData);
             this.legend.draw();
@@ -62,7 +60,9 @@ class LineChart extends Histogram {
         flow.call(this);
     }
     async requeryData(fn) {
-        let { fsm, dimensions, option } = this, data = null;
+        let { fsm, dimensions, option } = this, 
+            data = null;
+
         data = await fn.call(this, fsm, dimensions, option.fetch);
         this.data.dataset = data;
         this.dataset = this.parseData(data);
@@ -71,7 +71,7 @@ class LineChart extends Histogram {
     formatLegendData(data) {
         let { property: p } = this, 
             colors = p.colorPool,
-            dealData = data.map( item => item[0]['PROD']);
+            dealData = data.map( item => item[0]['legendLable']);
         return dealData.reduce((acc, cur, i) => {
             acc.push({
                 color: colors[i].HEX(), type: 'rect', label: cur, value: ''
@@ -114,12 +114,13 @@ class LineChart extends Histogram {
         this.updateXaxis(xAxisIns, svg);
     }
     drawLines(svg = null) {
-        let xScale = (this.xAxisBuilder).getScale();
-        let { xAxis, yAxis, property: p } = this;
-        let yScale = (this.yAxisBuilder).getScale();
+        let xScale = this.xAxisBuilder.getScale(),
+            { xAxis, yAxis, property: p } = this,
+            yScale = (this.yAxisBuilder).getScale();
+
         const lineLayout = line()
-            .x((d) => xScale(d[xAxis.dimension]))
-            .y((d) => yScale(d[yAxis.dimension]))
+            .x(d => xScale(d[xAxis.dimension]))
+            .y(d => yScale(d[yAxis.dimension]))
             // 添加弯曲度
             // https://bl.ocks.org/d3noob/ced1b9b18bd8192d2c898884033b5529
             // 上述链接展示参数的不同，线条会有怎样的变化
@@ -187,12 +188,20 @@ class LineChart extends Histogram {
     // 这个需要根据 x 轴 / y 轴展示的数据进行修改
     calcXaxisData() {
         // default xAxis type category
+        let longestXData = this.dataset.reduce((acc,cur)=> {
+            if(cur.length >= acc.length) {
+                acc = cur
+            }
+            return acc
+        },[]);
+        
         this.xAxis = Object.assign(Object.assign({}, this.xAxis), {
-            data: this.dataset[0].map((datum) => datum[this.xAxis.dimension]),
+            data: longestXData.map((datum) => datum[this.xAxis.dimension]),
         });
     }
     calcYaxisData() {
         const flatData = flatDeep(this.dataset);
+        
         this.yAxis = Object.assign(Object.assign({}, this.yAxis), {
             max: max(flatData.map(datum => datum[this.yAxis.dimension])),
         });

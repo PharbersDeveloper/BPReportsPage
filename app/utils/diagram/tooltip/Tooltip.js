@@ -61,7 +61,13 @@ class D3Tooltip {
         this.dimensions = data;
     }
     setContent(fn) {
-        const content = fn.call(null, this.data, this.dimensions);
+        let content = null;
+
+        if(typeof fn === 'function') {
+            content = fn.call(null, this.data, this.dimensions);
+        } else {
+            content = fn
+        }
         this.tooltip.html(content);
         this.tooltip
             .style("position", "absolute");
@@ -70,12 +76,13 @@ class D3Tooltip {
         this.position = p;
         const { container, tooltip } = this;
         let containerSize = [parseInt(container.style('width')),
-            parseInt(container.style('height'))];
-        let tooltipSize = [parseInt(tooltip.style('width')),
-            parseInt(tooltip.style('height'))];
-        let restWidthSpace = containerSize[0] / 2;
-        let restHeightSpace = containerSize[1] / 2;
-        let resultPosition = [p[0], p[1]];
+            parseInt(container.style('height'))],
+            tooltipSize = [parseInt(tooltip.style('width')),
+            parseInt(tooltip.style('height'))],
+            restWidthSpace = containerSize[0] / 2,
+            restHeightSpace = containerSize[1] / 2,
+            resultPosition = [p[0], p[1]];
+            
         switch (true) {
             case p[0] > restWidthSpace:
                 resultPosition[0] = p[0] - tooltipSize[0] - this.gap[0];
