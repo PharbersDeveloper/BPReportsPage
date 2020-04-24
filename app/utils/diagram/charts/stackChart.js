@@ -134,9 +134,9 @@ class StackChart extends Histogram {
             .data(d => d)
             .join(enter => enter.append('rect'), update => update, exit => exit.remove())
             .attr('x', (d) => {
-            // return xScale(new Date(d.data[this.xAxis.dimension]))
-            return xScale(d.data[this.xAxis.dimension]) + xScale.bandwidth() / 2;
-        })
+                // return xScale(new Date(d.data[this.xAxis.dimension]))
+                return xScale(d.data[this.xAxis.dimension]) + xScale.bandwidth() / 2;
+            })
             .attr('y', (d) => yScale(d[1]))
             .attr('height', (d) => yScale(d[0]) - yScale(d[1]))
             .attr('width', barWidth);
@@ -148,35 +148,55 @@ class StackChart extends Histogram {
         });
     }
     calcXaxisData() {
-        let longestXData = this.dataset.reduce((acc,cur)=> {
-            if(cur.length >= acc.length) {
+        let longestXData = this.dataset.reduce((acc, cur) => {
+            if (cur.length >= acc.length) {
                 acc = cur
             }
             return acc
-        },[]);
+        }, []);
         this.xAxis = Object.assign(Object.assign({}, this.xAxis), {
             data: longestXData.map(item => item.data[this.fsm.state]),
         });
     }
     mouseAction(svg) {
-        let { grid, property: p, dataset, tooltip } = this, curDimensions = [this.xAxis.dimension, this.yAxis.dimension], { pl, pr } = grid.padding, yAxisWidth = getAxisSide(svg.select(`.${this.yAxis.className}`)), leftBlank = pl + yAxisWidth;
+        let { grid, property: p, dataset, tooltip,fsm } = this,
+            curDimensions = [this.xAxis.dimension, this.yAxis.dimension],
+            { pl, pr } = grid.padding,
+            yAxisWidth = getAxisSide(svg.select(`.${this.yAxis.className}`)),
+            leftBlank = pl + yAxisWidth;
+
+            dataset = this.data.dataset;
         svg.on('mousemove', function () {
-            let eachSpackWidth = (grid.width - leftBlank - pr) / dataset.length, arr = dataset.map((_item, i) => i * eachSpackWidth), curPoint = event.offsetX - leftBlank, count = arr.findIndex((item, i) => item <= curPoint && arr[i + 1] >= curPoint);
-            count = count < 0 ? dataset.length - 1 : count;
-            let curData = dataset[Math.round(count)];
-            let p = clientPoint(this, event);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(p);
+            let eachSpackWidth = (grid.width - leftBlank - pr) / dataset.length,
+                arr = dataset.map((_item, i) => i * eachSpackWidth),
+                curPoint = event.offsetX - leftBlank,
+                count = arr.findIndex((item, i) => item <= curPoint && arr[i + 1] >= curPoint);
+            
+                count = count < 0 && curPoint>0 ? dataset.length - 1 : count;
+
+            let curData = dataset[Math.round(count)],
+                point = clientPoint(this, event),
+                // 可自定义 legend 通过此方式
+                preLegend = {
+                    content(data, dimensions,fsm) {
+                        let prods = Object.keys(data);
+
+                        prods.splice(prods.indexOf(fsm['state']),1);
+                        let total = prods.reduce((acc,cur)=> {
+                            return acc + data[cur];
+                        },0)
+                        let prodsTooltip = prods.map( prod => `<p>${prod} 销售额 ${formatLocale("thousands").format("~s")(data[prod])}</p>`).join(" ")
+                        return `<p>${data[fsm['state']]} </p>
+                                <p><span>总体市场规模</span> <span>${formatLocale("thousands").format("~s")(total)}</span></p>
+                                ${prodsTooltip}`;
+                    }
+                }
+            p.legend = Object.assign(preLegend, p.legend);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(function (data, dimensions) {
-                if (!data) {
-                    return `<p>本产品 - ${data['PRODUCT_NAME']}暂无数据</p>`;
-                }
-                return `<p>${data[dimensions[0]]} </p>
-                        <!-- <p>市场规模${formatLocale("thousands").format("~s")(data['quote'])}</p> -->
-                        <!-- <p>比例 ${format(".2%")(data[dimensions[1]])}</p> -->
-                        <p>市场规模 ${formatLocale("thousands").format("~s")(data[dimensions[1]])}</p>`;
-            });
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurFsm(fsm);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.on('mouseout', function () {

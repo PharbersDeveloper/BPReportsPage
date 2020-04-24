@@ -60,7 +60,7 @@ class LineChart extends Histogram {
         flow.call(this);
     }
     async requeryData(fn) {
-        let { fsm, dimensions, option } = this, 
+        let { fsm, dimensions, option } = this,
             data = null;
 
         data = await fn.call(this, fsm, dimensions, option.fetch);
@@ -69,9 +69,9 @@ class LineChart extends Histogram {
     }
 
     formatLegendData(data) {
-        let { property: p } = this, 
+        let { property: p } = this,
             colors = p.colorPool,
-            dealData = data.map( item => item[0]['legendLable']);
+            dealData = data.map(item => item[0]['legendLable']);
         return dealData.reduce((acc, cur, i) => {
             acc.push({
                 color: colors[i].HEX(), type: 'rect', label: cur, value: ''
@@ -138,7 +138,7 @@ class LineChart extends Histogram {
             const t = animationType();
             svg.select('.line-path')
                 .transition(t)
-                .duration(1600)
+                .duration(600)
                 .attrTween("stroke-dasharray", tweenDash);
             let circles = svg.append('g')
                 .selectAll('circle')
@@ -162,69 +162,81 @@ class LineChart extends Histogram {
                 .attr('r', 1)
                 .attr('stroke', () => p.colorPool[index].HEX())
                 .attr('fill', () => p.colorPool[index].HEX());
-            // combCirle
-            //     .on('mouseover', function (d: any) {
-            //         circleChange(select(this).select('.outer-circle'), 6)
-            //         circleChange(select(this).select('.inner-circle'), 4);
-            //         tooltipIns.setCurData(d);
-            //         tooltipIns.show();
-            //         tooltipIns.setContent(function (data: any) {
-            //             if (!data) {
-            //                 return `<p>本市场暂无数据</p>`
-            //             }
-            //             return `
-            //             <p>时间${ data[0]}</p>
-            //             <p>数据${formatLocale("thousands").format("~s")(data[1])}</p>
-            //             <p>其他数据${format(".2%")(data[3])}</p>`
-            //         })
-            //     })
-            //     .on('mouseout', function () {
-            //         circleChange(select(this).select('.outer-circle'), 3)
-            //         circleChange(select(this).select('.inner-circle'), 1)
-            //         tooltipIns.hidden()
-            //     })
         });
     }
     // 这个需要根据 x 轴 / y 轴展示的数据进行修改
     calcXaxisData() {
         // default xAxis type category
-        let longestXData = this.dataset.reduce((acc,cur)=> {
-            if(cur.length >= acc.length) {
+        let longestXData = this.dataset.reduce((acc, cur) => {
+            if (cur.length >= acc.length) {
                 acc = cur
             }
             return acc
-        },[]);
-        
+        }, []);
+
         this.xAxis = Object.assign(Object.assign({}, this.xAxis), {
             data: longestXData.map((datum) => datum[this.xAxis.dimension]),
         });
     }
     calcYaxisData() {
         const flatData = flatDeep(this.dataset);
-        
+
         this.yAxis = Object.assign(Object.assign({}, this.yAxis), {
             max: max(flatData.map(datum => datum[this.yAxis.dimension])),
         });
     }
     mouseAction(svg) {
-        let { grid, property: p, dataset, tooltip } = this, curDimensions = [this.xAxis.dimension, this.yAxis.dimension], { pl, pr } = grid.padding, yAxisWidth = getAxisSide(svg.select(`.${this.yAxis.className}`)), leftBlank = pl + yAxisWidth;
+        let { grid, property: p, dataset, tooltip, fsm } = this,
+            curDimensions = [this.xAxis.dimension, this.yAxis.dimension],
+            { pl, pr } = grid.padding,
+            yAxisWidth = getAxisSide(svg.select(`.${this.yAxis.className}`)),
+            leftBlank = pl + yAxisWidth;
+
+
         svg.on('mousemove', function () {
-            let eachSpackWidth = (grid.width - leftBlank - pr) / dataset.length, arr = dataset.map((_item, i) => i * eachSpackWidth), curPoint = event.offsetX - leftBlank, count = arr.findIndex((item, i) => item <= curPoint && arr[i + 1] >= curPoint);
-            count = count < 0 ? dataset.length - 1 : count;
-            let curData = dataset[Math.round(count)];
-            let p = clientPoint(this, event);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(p);
+            // let eachSpackWidth = (grid.width - leftBlank - pr) / dataset.length,
+            let longestXData = dataset.reduce((acc, cur) => {
+                if (cur.length >= acc.length) {
+                    acc = cur
+                }
+                return acc
+            }, []),
+                eachSpackWidth = (grid.width - leftBlank - pr) / longestXData.length,
+                arr = longestXData.map((_item, i) => i * eachSpackWidth),
+                curPoint = event.offsetX - leftBlank - pr,
+                count = arr.findIndex((item, i) => item <= curPoint && arr[i + 1] >= curPoint);
+
+            count = count < 0 && curPoint > 0 ? longestXData.length - 1 : count;
+            
+            let longestDataCur = longestXData[Math.round(count)],
+                longestDataCurKey = longestDataCur[fsm.state],
+                curData = dataset.map(data => {
+                    let cur = data.find(item => item[fsm.state] === longestDataCurKey);
+                    return cur ? cur : null
+                }),
+                point = clientPoint(this, event),
+                // 可自定义 legend 通过此方式
+                preLegend = {
+                    content(data, dimensions, fsm) {
+                        let prodsTooltip = data.map(prod => {
+                            if (prod) {
+                                return `<p>${prod.legendLable} 销售额 ${formatLocale("thousands").format("~s")(prod[dimensions[1]])}</p>`
+                            } else {
+                                return ''
+                            }
+                        }).join(" ")
+
+                        return `<p>${data.reduce((acc,cur) => cur?cur:acc,null)[fsm['state']]} </p>
+                                ${prodsTooltip}`;
+                    }
+                }
+            p.legend = Object.assign(preLegend, p.legend);
+
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(function (data, dimensions) {
-                if (!data) {
-                    return `<p>本产品 - ${data['PRODUCT_NAME']}暂无数据</p>`;
-                }
-                return `<p>${data[dimensions[0]]} </p>
-                        <!-- <p>市场规模${formatLocale("thousands").format("~s")(data['quote'])}</p> -->
-                        <!-- <p>比例 ${format(".2%")(data[dimensions[1]])}</p> -->
-                        <p>市场规模 ${formatLocale("thousands").format("~s")(data[dimensions[1]])}</p>`;
-            });
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurFsm(fsm);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.on('mouseout', function () {
@@ -233,4 +245,3 @@ class LineChart extends Histogram {
     }
 }
 export default LineChart;
- 

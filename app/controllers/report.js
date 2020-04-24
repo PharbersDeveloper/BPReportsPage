@@ -1,9 +1,9 @@
 import Controller from "@ember/controller";
 import { A } from "@ember/array";
 import { inject as service } from "@ember/service";
-import { all,resolve } from "rsvp";
+import { all, resolve } from "rsvp";
 import { computed, observer } from "@ember/object";
-import { isEmpty } from "@ember/utils";
+// import { isEmpty } from "@ember/utils";
 import ENV from "max-bi-v2/config/environment";
 
 const { host, port } = ENV.QueryAddress;
@@ -653,7 +653,7 @@ export default Controller.extend({
     */
     firstStackUpdate(fsm, dimensions, fetchConfig) {
 
-        let { comp, prov, prod } = this.getProperties("comp", "prov", "prod"),
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate"),
             state = fsm.state,
             sqlDimensions = dimensions.map((item) => {
                 if (fsm[item]) {
@@ -662,6 +662,10 @@ export default Controller.extend({
                 return "";
             }),
             area = prov === "全国" ? "COUNTRY" : "PROVINCE";
+
+        endDate = endDate.toString();
+        let year = endDate.slice(0, 4),
+            month = endDate.slice(4);
 
         prov = prov === "全国" ? "CHINA" : prov;
 
@@ -683,7 +687,7 @@ export default Controller.extend({
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    sql: `SELECT ${state}, MKT, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY = '信立泰' AND YEAR = 2019 AND QUARTER = 1 AND MONTH = 1 AND PRODUCT_NAME.keyword = '波立维片剂75MG7赛诺菲-安万特制药有限公司') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = '${state}-COUNTRY-MKT' AND COMPANY.keyword = '${comp}' AND COUNTRY.keyword = 'CHINA' ${sqlDimensions.join(
+                    sql: `SELECT ${state}, MKT, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME.keyword = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = '${state}-${area}-MKT' AND COMPANY.keyword = '${comp}' AND ${area}.keyword = '${prov}' ${sqlDimensions.join(
                         " "
                     )} ORDER BY ${state}.keyword`,
                 }),
@@ -713,7 +717,7 @@ export default Controller.extend({
             });
     },
     firstLineUpdate(fsm, dimensions, fetchConfig) {
-        let { comp, prov, prod } = this.getProperties("comp", "prov", "prod"),
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate"),
             state = fsm.state,
             sqlDimensions = dimensions.map(item => {
                 if (fsm[item]) {
@@ -722,6 +726,10 @@ export default Controller.extend({
                 return ''
             }),
             area = prov === "全国" ? "COUNTRY" : "PROVINCE";
+
+        endDate = endDate.toString();
+        let year = endDate.slice(0, 4),
+            month = endDate.slice(4);
 
         prov = prov === "全国" ? "CHINA" : prov;
 
@@ -738,7 +746,7 @@ export default Controller.extend({
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ "sql": `SELECT ${state}, MKT, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY = '信立泰' AND YEAR = 2019 AND QUARTER = 1 AND MONTH = 1 AND PRODUCT_NAME.keyword = '波立维片剂75MG7赛诺菲-安万特制药有限公司') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = '${state}-COUNTRY-MKT' AND COMPANY.keyword = '${comp}' AND COUNTRY.keyword = 'CHINA' ${sqlDimensions.join(" ")} ORDER BY ${state}.keyword` }),
+                body: JSON.stringify({ "sql": `SELECT ${state}, MKT, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME.keyword = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = '${state}-${area}-MKT' AND COMPANY.keyword = '${comp}' AND ${area}.keyword = '${prov}' ${sqlDimensions.join(" ")} ORDER BY ${state}.keyword` }),
             })
         ]).then((result) => {
             return all(result.map((res) => {
@@ -760,7 +768,7 @@ export default Controller.extend({
         })
     },
     secondStackUpdate(fsm, dimensions, fetchConfig) {
-        let { comp, prov, prod } = this.getProperties("comp", "prov", "prod"),
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate"),
             state = fsm.state,
             sqlDimensions = dimensions.map(item => {
                 if (fsm[item]) {
@@ -769,7 +777,9 @@ export default Controller.extend({
                 return ''
             }),
             area = prov === "全国" ? "COUNTRY" : "PROVINCE";
-
+        endDate = endDate.toString();
+        let year = endDate.slice(0, 4),
+            month = endDate.slice(4);
         prov = prov === "全国" ? "CHINA" : prov;
 
         return fetch(`${fetchConfig.address}?tag=${fetchConfig.tag}`, {
@@ -777,7 +787,7 @@ export default Controller.extend({
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ "sql": `SELECT ${state}, MOLE_NAME, SUM(SALES_VALUE) AS SALES_VALUE FROM fullcube2 WHERE DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = '${state}-${area}-MOLE_NAME' AND COMPANY = '${comp}' AND ${area} = '${prov}' AND MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '信立泰' AND YEAR = 2019 AND QUARTER = 1 AND MONTH = 1 AND PRODUCT_NAME = '介宁片剂50MG36山东新华医药集团有限责任公司') GROUP BY ${state}.keyword, MOLE_NAME.keyword ORDER BY ${state}.keyword` }),
+            body: JSON.stringify({ "sql": `SELECT ${state}, MOLE_NAME, SUM(SALES_VALUE) AS SALES_VALUE FROM fullcube2 WHERE DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = '${state}-${area}-MOLE_NAME' AND COMPANY = '${comp}' AND ${area} = '${prov}' AND MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') ${sqlDimensions.join(" ")}  GROUP BY ${state}.keyword, MOLE_NAME.keyword ORDER BY ${state}.keyword` }),
         }).then((result) => {
             return result.json()
         }).then((data) => {
@@ -787,7 +797,7 @@ export default Controller.extend({
                         [fsm.state]: item
                     }
                 }),
-                result = time.reduce((acc, cur, i) => {
+                result = time.reduce((acc, cur) => {
                     let state = fsm.state,
                         curTimeData = data.filter((item) => item[state] === cur[state]);
 
@@ -800,8 +810,8 @@ export default Controller.extend({
             return result
         })
     },
-    secondLineUpdate (fsm, dimensions,fc) {
-        let { comp, prov, prod } = this.getProperties("comp", "prov", "prod"),
+    secondLineUpdate(fsm, dimensions, fc) {
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate"),
             state = fsm.state,
             sqlDimensions = dimensions.map(item => {
                 if (fsm[item]) {
@@ -810,7 +820,9 @@ export default Controller.extend({
                 return ''
             }),
             area = prov === "全国" ? "COUNTRY" : "PROVINCE";
-
+        endDate = endDate.toString();
+        let year = endDate.slice(0, 4),
+            month = endDate.slice(4);
         prov = prov === "全国" ? "CHINA" : prov;
 
         return resolve(fetch(`${fc.address}?tag=array`, {
@@ -818,7 +830,7 @@ export default Controller.extend({
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ "sql": `SELECT PRODUCT_NAME FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY = '${comp}' AND YEAR = 2019 AND QUARTER = 1 AND MONTH = 1 AND PRODUCT_NAME.keyword = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'QUARTER-COUNTRY-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = 2019 AND QUARTER = 1 AND ${area}.keyword = '${prov}' ORDER BY SALES_VALUE DESC LIMIT 10` }),
+            body: JSON.stringify({ "sql": `SELECT PRODUCT_NAME FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME.keyword = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${area}-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND ${area}.keyword = '${prov}' ORDER BY SALES_VALUE DESC LIMIT 10` }),
         })).then((data) => {
             return data.json()
         }).then((data) => {
@@ -853,8 +865,8 @@ export default Controller.extend({
         })
     },
     mapAndScatterUpdate(fsm, dimensions, fetchConfig) {
-        let { comp, prov, prod, year, quarter, month } = this.getProperties( "comp", "prov", "prod", "year", "quarter", "month");
-        
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
+
         return new Promise((resolve) => {
             let state = fsm.state,
                 sqlDimensions = dimensions.map(item => {
@@ -862,7 +874,15 @@ export default Controller.extend({
                         return `AND ${item}.keyword = '${fsm[item]}'`
                     }
                     return ''
-                })
+                }),
+                area = prov === "全国" ? "COUNTRY" : "PROVINCE";
+            prov = prov === "全国" ? "CHINA" : prov;
+            endDate = endDate.toString();
+            let year = endDate.slice(0, 4),
+                month = endDate.slice(4);
+            
+                // prov === "CHINA" ? fsm.state = "PROVINCE":fsm.state = "CITY";
+                // state = fsm.state
             // TODO 内部具体动作应该提出到组件或者路由中操作
             if (state == "PROVINCE") {
                 resolve(fetch(`${fetchConfig.address}?tag=${fetchConfig.tag}`, {
@@ -870,7 +890,7 @@ export default Controller.extend({
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ "sql": `SELECT ${state}, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND QUARTER = ${quarter} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${state}-MKT' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND QUARTER = ${quarter} AND MONTH = ${month} AND COUNTRY.keyword = 'CHINA'` }),
+                    body: JSON.stringify({ "sql": `SELECT ${state}, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${state}-MKT' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND ${area}.keyword = '${prov}'` }),
                 }))
             } else if (state === 'CITY') {
                 let prov = fsm[dimensions[0]]
@@ -879,7 +899,53 @@ export default Controller.extend({
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ "sql": `SELECT ${state}, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND QUARTER = ${quarter} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${state}-MKT' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND QUARTER = ${quarter} AND MONTH = ${month} AND PROVINCE.keyword like '${prov}%'` }),
+                    body: JSON.stringify({ "sql": `SELECT ${state}, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${state}-MKT' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PROVINCE.keyword like '${prov}%'` }),
+                }))
+            }
+        }).then((result) => {
+            return result.json();
+        }).then(data => {
+            return data;
+        })
+    },
+    scatterUpdate(fsm, dimensions, fetchConfig) {
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
+
+        return new Promise((resolve) => {
+            let state = fsm.state,
+                sqlDimensions = dimensions.map(item => {
+                    if (fsm[item]) {
+                        return `AND ${item}.keyword = '${fsm[item]}'`
+                    }
+                    return ''
+                }),
+                area = prov === "全国" ? "COUNTRY" : "PROVINCE";
+            prov = prov === "全国" ? "CHINA" : prov;
+            endDate = endDate.toString();
+            let year = endDate.slice(0, 4),
+                month = endDate.slice(4);
+            
+                // prov === "CHINA" ? 
+                //     fsm.state == "PROVINCE" ?"" :fsm.rollup():
+                //     fsm.state == "PROVINCE" ? fsm.drilldown() :"";
+                // state = fsm.state;
+            // TODO 内部具体动作应该提出到组件或者路由中操作
+            if (state == "PROVINCE") {
+                resolve(fetch(`${fetchConfig.address}?tag=${fetchConfig.tag}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "sql": `SELECT ${state}, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${state}-MKT' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND ${area}.keyword = '${prov}'` }),
+                }))
+            } else if (state === 'CITY') {
+                let stateProv = fsm[dimensions[0]]
+                resolve(fetch(`${fetchConfig.address}?tag=${fetchConfig.tag}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "sql": `SELECT ${state}, SALES_VALUE, SALES_QTY FROM fullcube2 WHERE MKT IN (SELECT MKT FROM fullcube2 WHERE DIMENSION_NAME.keyword = '2-time-prod' AND DIMENSION_VALUE.keyword = 'MONTH-PRODUCT_NAME' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PRODUCT_NAME = '${prod}') AND DIMENSION_NAME.keyword = '3-time-geo-prod' AND DIMENSION_VALUE.keyword = 'MONTH-${state}-MKT' AND COMPANY.keyword = '${comp}' AND YEAR = ${year} AND MONTH = ${month} AND PROVINCE.keyword like '${stateProv}%'` }),
                 }))
             }
         }).then((result) => {

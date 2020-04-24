@@ -118,11 +118,15 @@ class MapChart extends Histogram {
         this.dataset = this.parseData(data);
     }
     testInteraction(svg) {
-        let { fsm, selection, dimensions, dataset } = this;
-        let self = this;
+        let { fsm, selection, dimensions, dataset } = this,
+            self = this;
+
         svg.selectAll('path').on('click', function (d) {
             let prov = d.properties.name, curData = dataset.find((provData) => prov.includes(provData[fsm.state]));
+            
             if (fsm.state === dimensions[dimensions.length - 1] || !curData) {
+                self.currentProv = '全国'
+
                 // TODO 当当前省份无数据时,进行 rollup 就出现错误,但是可以忽略
                 // 如果是最后一个维度,则进行清空
                 dimensions.forEach((item) => {
@@ -132,23 +136,26 @@ class MapChart extends Histogram {
                 self.updateChart(selection);
             }
             else {
+                self.currentProv = prov;
+
                 fsm.drilldown();
                 dimensions.forEach((item) => {
                     fsm[item] = curData[item] || fsm[item];
                 });
                 self.updateChart(selection);
+
             }
         });
     }
     drawMap(svg) {
-        let { grid, property: p, geo, dataset, fsm, dimensions } = this;
-
-        const maxData = max(dataset.map((datum) => datum[geo.dimension]));
+        let { grid, property: p, geo, dataset, fsm, dimensions } = this,
+            maxData = max(dataset.map((datum) => datum[geo.dimension]));
         // const minData = min(dataset.map((datum: any[]) => datum[geo.dimension]))
         const color = scaleLinear()
             .domain([0, maxData])
             .range(p.colorPool.map(color => color.HEX()));
-        this.showRect(svg)
+        this.showRect(svg);
+
         if (fsm.state === dimensions[0]) {
             return xml("../assets/json/southchinasea.svg").then(xmlDocument => {
                 svg.html(function () {
@@ -276,22 +283,22 @@ class MapChart extends Histogram {
             let point = clientPoint(this, event),
                 // 可自定义 legend 通过此方式
                 preLegend = {
-                content(data, dimensions) {
-                    if (!data) {
-                        return `<p>本市场暂无数据</p>`;
-                    }
-                    return `
+                    content(data, dimensions) {
+                        if (!data) {
+                            return `<p>本市场暂无数据</p>`;
+                        }
+                        return `
                             <p>${data[dimensions[0]]} 市场概况</p>
                             <p>市场规模 ${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
                             <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
                             <!-- <p>sales ${format(".2%")(data['sales'])}</p> -->`;
+                    }
                 }
-            }
-            p.legend = Object.assign(preLegend,p.legend);
+            p.legend = Object.assign(preLegend, p.legend);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent( p.legend.content);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.selectAll("path").on('mouseout', function () {

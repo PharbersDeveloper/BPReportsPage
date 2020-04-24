@@ -3,11 +3,12 @@ import { select } from 'd3-selection';
 import { isEmpty } from '@ember/utils';
 import { ChartPaint, Notation, Text, } from 'max-bi-v2/utils/diagram/index'
 import { getProperties } from '@ember/object';
+import { computed } from '@ember/object';
 
 export default Component.extend({
     // tagName: '',
     comp: '信立泰',
-    prov: '广东',
+    prov: '全国',
     prod: '波立维片剂75MG7赛诺菲-安万特制药有限公司',
     year: 2019,
     quarter: 1,
@@ -22,15 +23,11 @@ export default Component.extend({
     },
     didUpdateAttrs() {
         this._super(...arguments);
-        console.log("❗️❗️❗️❗️❗️❗️❗️❗️")
-        console.log("update")
-        console.log("❗️❗️❗️❗️❗️❗️❗️❗️")
         let container = select(`#${this.chartId}`);
         if (container.selectAll('svg').nodes().length) {
             this.removeSvg(container);
             this.draw()
         }
-
     },
     didInsertElement() {
         this._super(...arguments);
@@ -40,18 +37,18 @@ export default Component.extend({
         const chartId = this.eid;
         this.set('chartId', 'chart' + chartId)
     },
-    draw() {
-        let container = select(`#${this.chartId}`);
+    actions: {
+        changeProv() {
+            let prov = this.data.histogram.currentProv;
 
-        // comp = '信立泰',
-        // prov = '广东',
-        // prod = '波立维片剂75MG7赛诺菲-安万特制药有限公司',
-        // year = 2019,
-        // quarter = 1,
-        // month = 1;
+            typeof this.onCHangeProv === 'function' ?this.onChangeProv(prov):null
+        }
+    },
+    draw() {
+        let container = select(`#${this.chartId}`),
+        chartConfPromise = null;
 
         // 必须在draw 执行之前重设 updateData 的方法
-        let chartConfPromise = null
         if (isEmpty(this.store)) {
             chartConfPromise = this.get('ajax').request(this.confReqAdd, {
                 method: 'GET',
@@ -62,7 +59,6 @@ export default Component.extend({
         }
 
         chartConfPromise.then(chart => {
-            console.log(chart)
             return {
                 chart,
                 histogram: new ChartPaint(chart),
@@ -71,9 +67,9 @@ export default Component.extend({
                 notation: new Notation()
             }
         }).then(data => {
+            this.data = data
             data.histogram.updateData = this.updateData.bind(this)
             data.histogram.draw(container);
-
         })
     },
     removeSvg(container) {

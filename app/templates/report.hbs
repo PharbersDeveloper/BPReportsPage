@@ -1,4 +1,3 @@
-
 <div class="bp-report">
   {{#bp-column-layout classNames="report-container"}}
     {{#bp-row-layout
@@ -56,10 +55,7 @@
                     {{#bp-text classNames="heading-xsmall product-sales-text"}}
                       产品销量
                     {{/bp-text}}
-                    {{bp-product-card-tag
-                      index=index
-                      type="default"
-                      subtle=true
+                    {{bp-product-card-tag index=index type="default" subtle=true
                     }}
                   {{/bp-row-layout}}
                   {{#bp-row-layout classNames="product-sales-data-box"}}
@@ -72,23 +68,17 @@
                     }}
                       Mn
                     {{/bp-text}}
-                    {{#product-sales-data-percent
-                      value=item.MOM_RATE
-                    }}
+                    {{#product-sales-data-percent value=item.MOM_RATE}}
                       {{h-format-percentage item.MOM_RATE 2}}%
                     {{/product-sales-data-percent}}
-                    {{bp-icon
-                      value=item.MOM_RATE
-                      color=null
-                      iconSmall=true
-                    }}
+                    {{bp-icon value=item.MOM_RATE color=null iconSmall=true}}
                   {{/bp-row-layout}}
                 {{/bp-column-layout}}
               {{/bp-row-layout}}
             {{/bp-column-layout}}
           {{else}}
             {{#bp-column-layout
-              mainAxis="main-space-between" 
+              mainAxis="main-space-between"
               classNames="report-product-card"
               click=(action "changeProd" item.PRODUCT_NAME index)
             }}
@@ -170,12 +160,11 @@
           eid="5e9eb4f4a9d14da0d86b2adf"
           store=this.store
           updateData=this.mapAndScatterUpdate
-            comp=compName
-            prov=provName
-            cityName=cityName
-            startDate="201801"
-            endDate=endDate
-            prod=prodName
+          comp=compName
+          startDate="201801"
+          endDate=endDate
+          prod=prodName
+          onChangeProv=(action "changeProv")
         }}
       {{/bp-column-layout}}
       {{#bp-column-layout classNames="report-scatter-container"}}
@@ -203,13 +192,12 @@
         {{diagram-d3
           eid="5e9fb821c44f045878415ead"
           store=this.store
-          updateData=this.mapAndScatterUpdate
-            comp=compName
-            prov=provName
-            cityName=cityName
-            startDate="201801"
-            endDate=endDate
-            prod=prodName}}
+          updateData=this.scatterUpdate
+          comp=compName
+          startDate="201801"
+          endDate=endDate
+          prod=prodName
+        }}
       {{/bp-column-layout}}
     {{/bp-row-layout}}{{#bp-row-layout
       classNames="report-table-bars"
@@ -285,11 +273,10 @@
             store=this.store
             updateData=this.firstStackUpdate
             comp=compName
-            prov=provName
-            cityName=cityName
             startDate="201801"
             endDate=endDate
-            prod=prodName}}
+            prod=prodName
+          }}
         {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
           {{#bp-column-layout
             classNames="bars-title-container"
@@ -329,11 +316,10 @@
             store=this.store
             updateData=this.firstLineUpdate
             comp=compName
-            prov=provName
-            cityName=cityName
             startDate="201801"
             endDate=endDate
-            prod=prodName}}
+            prod=prodName
+          }}
         {{/bp-column-layout}}
         {{#bp-column-layout classNames="bars-content"}}
           {{#bp-column-layout
@@ -374,11 +360,10 @@
             store=this.store
             updateData=this.secondStackUpdate
             comp=compName
-            prov=provName
-            cityName=cityName
             startDate="201801"
             endDate=endDate
-            prod=prodName}}
+            prod=prodName
+          }}
         {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
           {{#bp-column-layout
             classNames="bars-title-container"
@@ -418,11 +403,10 @@
             store=this.store
             updateData=this.secondLineUpdate
             comp=compName
-            prov=provName
-            cityName=cityName
             startDate="201801"
             endDate=endDate
-            prod=prodName}}
+            prod=prodName
+          }}
         {{/bp-column-layout}}
       {{/bp-column-layout}}
     {{/bp-row-layout}}

@@ -82,6 +82,7 @@ class ScatterChart extends Histogram {
         let self = this;
         svg.selectAll('circle').on('click', function (d) {
             let curData = d;
+            console.log(fsm)
             if (fsm.state === dimensions[dimensions.length - 1] || !curData) {
                 // TODO 当当前省份无数据时,进行 rollup 就出现错误,但是可以忽略
                 // 如果是最后一个维度,则进行清空
@@ -204,7 +205,6 @@ class ScatterChart extends Histogram {
                     }
                 };
             p.legend = Object.assign(preLegend,p.legend);
-            console.log(point)
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(d);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);

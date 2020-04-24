@@ -1,3 +1,4 @@
+import { isEmpty } from '@ember/utils';
 class D3Tooltip {
     constructor(container, className = "") {
         this.isShow = false;
@@ -6,6 +7,7 @@ class D3Tooltip {
         this.gap = [24, 24];
         this.data = null;
         this.dimensions = [];
+        this.fsm = null;
         this.container = container;
         const tooltip = container.append('div');
         let cn = this.getClass(className + ' bp-tooltip');
@@ -60,11 +62,17 @@ class D3Tooltip {
     setCurDimensions(data) {
         this.dimensions = data;
     }
+    setCurFsm(fsm) {
+        this.fsm = fsm
+    }
     setContent(fn) {
         let content = null;
-
-        if(typeof fn === 'function') {
-            content = fn.call(null, this.data, this.dimensions);
+        if(isEmpty(this.data)) {
+            this.hidden();
+            return;
+        }
+        if (typeof fn === 'function') {
+            content = fn.call(null, this.data, this.dimensions, this.fsm);
         } else {
             content = fn
         }
@@ -76,13 +84,13 @@ class D3Tooltip {
         this.position = p;
         const { container, tooltip } = this;
         let containerSize = [parseInt(container.style('width')),
-            parseInt(container.style('height'))],
+        parseInt(container.style('height'))],
             tooltipSize = [parseInt(tooltip.style('width')),
             parseInt(tooltip.style('height'))],
             restWidthSpace = containerSize[0] / 2,
             restHeightSpace = containerSize[1] / 2,
             resultPosition = [p[0], p[1]];
-            
+
         switch (true) {
             case p[0] > restWidthSpace:
                 resultPosition[0] = p[0] - tooltipSize[0] - this.gap[0];
@@ -106,7 +114,7 @@ class D3Tooltip {
             default:
                 break;
         }
-        this.moveTo(resultPosition[0], resultPosition[1]);
+        this.moveTo(resultPosition[0] < 0 ? 0 : resultPosition[0], resultPosition[1]);
     }
     moveTo(x, y) {
         this.tooltip
@@ -143,4 +151,3 @@ class D3Tooltip {
     }
 }
 export default D3Tooltip;
- 
