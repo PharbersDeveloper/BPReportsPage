@@ -6,6 +6,8 @@ export default DS.Model.extend({
 	commonts: DS.attr(),  // should be a relationship
 	dataset: DS.attr(), // should be a relationship
 	dimension: DS.attr(), // same up
+	// 待添加 
+	// legend: DS.attr(),
 	// 以下用于设置drilldown / scrollup 操作
 	dimensions: DS.attr(),
 	measures: DS.attr(),

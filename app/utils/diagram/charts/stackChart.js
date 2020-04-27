@@ -191,12 +191,14 @@ class StackChart extends Histogram {
                                 ${prodsTooltip}`;
                     }
                 }
-            p.legend = Object.assign(preLegend, p.legend);
+                p.setLegendContent(p.getLegendContent() || preLegend.content)
+
+            // p.legend = Object.assign(preLegend, p.legend);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurFsm(fsm);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.getLegendContent());
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.on('mouseout', function () {

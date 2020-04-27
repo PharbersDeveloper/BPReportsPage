@@ -199,16 +199,19 @@ class ScatterChart extends Histogram {
                             return `<p>本市场暂无数据</p>`;
                         }
                         return `
-                                <p>${data[dimensions[0]]} 市场概况</p>
-                                <p>市场规模 ${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
-                                <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>`;
+                                <p>${data[dimensions[0]]}</p>
+                                <p>产品销量 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
+                                <p>产品销量增长率 ${format(".2%")(data['SALES_VALUE_GROWTH_RATE'])}</p>
+                                <p>产品份额 ${format(".2%")(data['PROD_SHARE'])}</p>`;
                     }
                 };
-            p.legend = Object.assign(preLegend,p.legend);
+                p.setLegendContent(p.getLegendContent() || preLegend.content);
+                
+            // p.legend = Object.assign(preLegend,p.legend);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(d);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.getLegendContent());
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.selectAll("circle").on('mouseout', function () {

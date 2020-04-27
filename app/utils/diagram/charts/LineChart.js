@@ -3,7 +3,7 @@ import { event, clientPoint } from 'd3-selection';
 import { getAxisSide } from '../scale/axisTransform';
 import { flatDeep } from '../data/FlatDeep';
 import { animationType, tweenDash } from '../animation/animation';
-import { max } from 'd3-array';
+import { max, min } from 'd3-array';
 import { line, curveCatmullRom } from 'd3-shape';
 // import StateMachine from 'javascript-state-machine';
 import D3Tooltip from '../tooltip/Tooltip';
@@ -180,9 +180,9 @@ class LineChart extends Histogram {
     }
     calcYaxisData() {
         const flatData = flatDeep(this.dataset);
-
         this.yAxis = Object.assign(Object.assign({}, this.yAxis), {
             max: max(flatData.map(datum => datum[this.yAxis.dimension])),
+            min: typeof this.yAxis.min === 'string' ? min(flatData.map(datum => datum[this.yAxis.dimension])) : this.yAxis.min
         });
     }
     mouseAction(svg) {
@@ -194,7 +194,6 @@ class LineChart extends Histogram {
 
 
         svg.on('mousemove', function () {
-            // let eachSpackWidth = (grid.width - leftBlank - pr) / dataset.length,
             let longestXData = dataset.reduce((acc, cur) => {
                 if (cur.length >= acc.length) {
                     acc = cur
@@ -207,7 +206,7 @@ class LineChart extends Histogram {
                 count = arr.findIndex((item, i) => item <= curPoint && arr[i + 1] >= curPoint);
 
             count = count < 0 && curPoint > 0 ? longestXData.length - 1 : count;
-            
+
             let longestDataCur = longestXData[Math.round(count)],
                 longestDataCurKey = longestDataCur[fsm.state],
                 curData = dataset.map(data => {
@@ -217,26 +216,19 @@ class LineChart extends Histogram {
                 point = clientPoint(this, event),
                 // 可自定义 legend 通过此方式
                 preLegend = {
-                    content(data, dimensions, fsm) {
-                        let prodsTooltip = data.map(prod => {
-                            if (prod) {
-                                return `<p>${prod.legendLable} 销售额 ${formatLocale("thousands").format("~s")(prod[dimensions[1]])}</p>`
-                            } else {
-                                return ''
-                            }
-                        }).join(" ")
-
-                        return `<p>${data.reduce((acc,cur) => cur?cur:acc,null)[fsm['state']]} </p>
-                                ${prodsTooltip}`;
+                    content(data, dimensions,jsm) {
+                        return `<p>${data[0][jsm["state"]]}</p>
+                        <p>产品增长率 ${format(".2%")(data.find(prod => prod.legendLable === "产品")[dimensions[1]])}</p>
+                            <p>产品市场规模增长率 ${format(".2%")(data.find(prod => prod.legendLable === "市场")['FATHER_GEO_SALES_VALUE_GROWTH_RATE'])} </p>`;
                     }
                 }
-            p.legend = Object.assign(preLegend, p.legend);
+            p.setLegendContent(p.getLegendContent() || preLegend.content);
 
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurFsm(fsm);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.getLegendContent());
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.on('mouseout', function () {

@@ -1,9 +1,7 @@
 import Component from '@ember/component';
 import { select } from 'd3-selection';
 import { isEmpty } from '@ember/utils';
-import { ChartPaint, Notation, Text, } from 'max-bi-v2/utils/diagram/index'
-import { getProperties } from '@ember/object';
-import { computed } from '@ember/object';
+import { ChartPaint, Notation, Text, } from 'max-bi-v2/utils/diagram/index';
 
 export default Component.extend({
     // tagName: '',
@@ -21,6 +19,23 @@ export default Component.extend({
     updateData( /*fsm , dimensions, fetchConfig*/) {
         // dosomething 
     },
+    // 当前图表的 legend ,
+    /**
+     * @author Frank Wang
+     * @method
+     * @name legendContent
+     * @description chart's legend
+     * @param data
+     * @param dimensions
+     * @param jsm - javascript state - machine
+     * @return {string}
+     * @example 创建例子。
+     * @public
+     */
+    // legendContent(/**data,dimensions,jsm */) {
+
+    // },
+    legendContent: null,
     didUpdateAttrs() {
         this._super(...arguments);
         let container = select(`#${this.chartId}`);
@@ -41,12 +56,12 @@ export default Component.extend({
         changeProv() {
             let prov = this.data.histogram.currentProv;
 
-            typeof this.onCHangeProv === 'function' ?this.onChangeProv(prov):null
+            typeof this.onCHangeProv === 'function' ? this.onChangeProv(prov) : null
         }
     },
     draw() {
         let container = select(`#${this.chartId}`),
-        chartConfPromise = null;
+            chartConfPromise = null;
 
         // 必须在draw 执行之前重设 updateData 的方法
         if (isEmpty(this.store)) {
@@ -59,6 +74,8 @@ export default Component.extend({
         }
 
         chartConfPromise.then(chart => {
+            chart.legend = Object.assign(chart.legend || {}, { content: this.legendContent })
+            
             return {
                 chart,
                 histogram: new ChartPaint(chart),

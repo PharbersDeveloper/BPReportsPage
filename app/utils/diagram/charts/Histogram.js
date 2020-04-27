@@ -74,7 +74,7 @@ class Histogram {
         this.property.relativePos = new Position(option.position.x, option.position.y);
         this.property.rotate = new Rotation(option.rotate.degree);
         this.property.colorPool = option.colorPool.map((color) => new Color(color));
-        this.property.legend = option.legend
+        this.property.legend = option.legend || {}
         this.grid = {
             padding: (_a = this.property.hitSize) === null || _a === void 0 ? void 0 : _a.getPadding(),
             width: (_b = this.property.hitSize) === null || _b === void 0 ? void 0 : _b.getWidth(),

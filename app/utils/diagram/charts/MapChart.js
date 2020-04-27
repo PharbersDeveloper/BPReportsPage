@@ -289,16 +289,18 @@ class MapChart extends Histogram {
                         }
                         return `
                             <p>${data[dimensions[0]]} 市场概况</p>
-                            <p>市场规模 ${formatLocale("thousands").format("~s")(data['SALES_QTY'])}</p>
-                            <p>销售额 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
+                            <p>市场规模 ${formatLocale("thousands").format("~s")(data['SALES_VALUE'])}</p>
+                            <p>EI ${format(".1f")(data['GEO_EI'])}</p>
                             <!-- <p>sales ${format(".2%")(data['sales'])}</p> -->`;
                     }
                 }
-            p.legend = Object.assign(preLegend, p.legend);
+                p.setLegendContent(p.getLegendContent() || preLegend.content);
+
+            // p.legend = Object.assign(preLegend, p.legend);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.updatePosition(point);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurData(curData);
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.setCurDimensions(curDimensions);
-            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.legend.content);
+            tooltip === null || tooltip === void 0 ? void 0 : tooltip.setContent(p.getLegendContent());
             tooltip === null || tooltip === void 0 ? void 0 : tooltip.show();
         });
         svg.selectAll("path").on('mouseout', function () {
