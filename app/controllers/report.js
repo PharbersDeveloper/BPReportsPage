@@ -137,8 +137,9 @@ export default Controller.extend({
                 provSql =
                     this.provName === "全国"
                         ? ""
-                        : " AND PROVINCE = '" + this.provName + "'",
+                        : " AND PROVINCE = '" + this.provName.substring(0,2) + "%" + "'",
                 citySql = this.cityName ? " AND CITY = '" + this.cityName + "'" : "",
+                dimensionValueSql = citySql ? "MONTH-CITY-PRODUCT_NAME" : provSql ? "MONTH-PROVINCE-PRODUCT_NAME" : "MONTH-COUNTRY-PRODUCT_NAME", // 下钻纬度，请求数据到全国/省份/城市
                 columns = [
                     {
                         name: "产品名称",
@@ -148,19 +149,19 @@ export default Controller.extend({
                     },
                     {
                         name: "市场规模(Mn)",
-                        valuePath: "MKT_SALES",
+                        valuePath: "FATHER_PROD_SALES_VALUE",
                         isSortable: true,
                         cellComponent: "format-mn",
                     },
                     {
                         name: "市场增长率",
-                        valuePath: "MKT_MOM",
+                        valuePath: "FATHER_PROD_SALES_VALUE_GROWTH_RATE",
                         isSortable: true,
                         cellComponent: "format-percentage",
                     },
                     {
                         name: "产品销售额(Mn)",
-                        valuePath: "PROD_SALES",
+                        valuePath: "FATHER_PROD_SALES_VALUE",
                         isSortable: true,
                         cellComponent: "format-mn",
                     },
@@ -172,28 +173,30 @@ export default Controller.extend({
                     },
                     {
                         name: "产品销售增长率",
-                        valuePath: "PROD_MOM",
+                        valuePath: "SALES_VALUE_GROWTH_RATE",
                         isSortable: true,
                         cellComponent: "format-percentage",
                     },
                     {
                         name: "EI",
-                        valuePath: "EI",
+                        valuePath: "PROD_EI",
                         isSortable: true,
                         cellComponent: "format-decimal",
                     },
                 ],
                 rows = [],
-                queryDimensionSql = `SELECT PRODUCT_NAME, AVG(CURR_MKT_SALES_IN_${selectScope}) AS MKT_SALES, AVG(MOM_RATE_ON_MKT_${selectScope}) AS MKT_MOM, AVG(CURR_PROD_SALES_IN_${selectScope}) AS PROD_SALES, AVG(CURR_PROD_${selectScope}_SHARE) AS PROD_SHARE, AVG(MOM_RATE_ON_PROD_${selectScope}) AS PROD_MOM, AVG(EI_PROD_${selectScope}) AS EI FROM result WHERE MKT IN (SELECT MKT FROM result WHERE COMPANY = '${compName}' AND DATE = ${endDate} AND PRODUCT_NAME = '${prodName}') AND COMPANY = '${compName}' AND DATE = ${endDate} ${provSql} ${citySql} GROUP BY PRODUCT_NAME.keyword`,
+                // queryDimensionSql = `SELECT PRODUCT_NAME, AVG(CURR_MKT_SALES_IN_${selectScope}) AS MKT_SALES, AVG(MOM_RATE_ON_MKT_${selectScope}) AS MKT_MOM, AVG(CURR_PROD_SALES_IN_${selectScope}) AS PROD_SALES, AVG(CURR_PROD_${selectScope}_SHARE) AS PROD_SHARE, AVG(MOM_RATE_ON_PROD_${selectScope}) AS PROD_MOM, AVG(EI_PROD_${selectScope}) AS EI FROM cube WHERE MKT IN (SELECT MKT FROM cube WHERE COMPANY = '${compName}' AND DATE = ${endDate} AND PRODUCT_NAME = '${prodName}') AND COMPANY = '${compName}' AND DATE = ${endDate} ${provSql} ${citySql} GROUP BY PRODUCT_NAME.keyword`,
+                queryDimensionSql = `SELECT PRODUCT_NAME,FATHER_PROD_SALES_VALUE,FATHER_PROD_SALES_VALUE_GROWTH_RATE,FATHER_PROD_SALES_VALUE,PROD_SHARE,SALES_VALUE_GROWTH_RATE,PROD_EI FROM cube WHERE DIMENSION_NAME = '3-time-geo-prod' AND DIMENSION_VALUE = '${dimensionValueSql}' AND MKT IN (SELECT MKT FROM cube WHERE DIMENSION_NAME = '2-time-prod' AND DIMENSION_VALUE = 'MONTH-PRODUCT_NAME' AND COMPANY = '${compName}' AND YEAR = 2019 AND QUARTER = 1 AND MONTH = 2 AND PRODUCT_NAME = '${prodName}') AND COMPANY = '${compName}' ${provSql} AND COUNTRY = 'CHINA' AND YEAR = 2019 AND QUARTER = 1 AND MONTH = 2`,
                 reqBody = {
                     sql: queryDimensionSql,
                 },
                 ec = {
                     tag: "row2line",
                     dimension:
-                        "PRODUCT_NAME,MKT_SALES,MKT_MOM,PROD_SALES,PROD_SHARE,PROD_MOM,EI",
+                        // "PRODUCT_NAME,MKT_SALES,MKT_MOM,PROD_SALES,PROD_SHARE,PROD_MOM,EI",
+                        "PRODUCT_NAME,FATHER_PROD_SALES_VALUE,FATHER_PROD_SALES_VALUE_GROWTH_RATE,FATHER_PROD_SALES_VALUE,PROD_SHARE,SALES_VALUE_GROWTH_RATE,PROD_EI",
                 };
-
+            
             return this.ajax
                 .request(
                     `${host}:${port}/sql?tag=${ec.tag}&dimensionKeys=${ec.dimension}`,
@@ -217,6 +220,10 @@ export default Controller.extend({
                             [keys[6]]: ele[6],
                         };
                     });
+                    console.log({
+                        rows,
+                        columns
+                    })
                     return {
                         rows,
                         columns,
@@ -895,7 +902,7 @@ export default Controller.extend({
     },
     mapAndScatterUpdate(fsm, dimensions, fc) {
         let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
-
+        console.log(fsm[dimensions[0]])
         return new Promise((resolve) => {
             let state = fsm.state,
                 sqlDimensions = dimensions.map(item => {
@@ -993,6 +1000,7 @@ export default Controller.extend({
     actions: {
         changeProv(prov) {
             this.set("provName", prov);
+
         },
         changeCity(city) {
             this.set("cityName", city);

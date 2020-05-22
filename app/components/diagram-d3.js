@@ -56,7 +56,7 @@ export default Component.extend({
         changeProv() {
             let prov = this.data.histogram.currentProv;
 
-            typeof this.onCHangeProv === 'function' ? this.onChangeProv(prov) : null
+            typeof this.onChangeProv === 'function' ? this.onChangeProv(prov) : null
         }
     },
     draw() {

@@ -30,7 +30,7 @@ module.exports = function (environment) {
       status: "self",
       scope: "APP/MAXBI",
       host: 'http://oauth.pharbers.com',
-      redirectUri: 'http://maxview.pharbers.com:4200/oauth-callback'
+      redirectUri: 'http://maxview.pharbers.com:8081/oauth-callback'
     },
     QueryAddress: {
       host: "http://192.168.100.174",
@@ -39,14 +39,15 @@ module.exports = function (environment) {
       db: ""
     }
   };
+  
 
   if (environment === 'development') {
     // ENV.QueryAddress.host = "http://192.168.100.174"
     ENV.QueryAddress.host = "http://59.110.31.215"
 
-    ENV.QueryAddress.port = 3000
-    ENV.OAuth.clientId = "5e43c0518c02f17e7d3c0b38"
-    ENV.OAuth.redirectUri = 'http://maxview.pharbers.com:4200/oauth-callback'
+    ENV.QueryAddress.port = 3000 
+    ENV.OAuth.clientId = "5ec4ad12c46f0407cfceebab" // 属于ember.preview.pharbers.com 的client id
+    ENV.OAuth.redirectUri = 'http://ember.preview.pharbers.com/oauth-callback'
   }
 
   if (environment === 'test') {
