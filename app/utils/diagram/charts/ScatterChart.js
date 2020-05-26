@@ -86,7 +86,6 @@ class ScatterChart extends Histogram {
         svg.selectAll('circle').on('click', function (d) {
             let curData = d;
             let prov = d.PROVINCE;
-            console.log(fsm)
             if (fsm.state === dimensions[dimensions.length - 1] || !curData) {
                 self.currentProv = "全国";
                 // TODO 当当前省份无数据时,进行 rollup 就出现错误,但是可以忽略

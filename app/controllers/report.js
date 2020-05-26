@@ -902,7 +902,6 @@ export default Controller.extend({
     },
     mapAndScatterUpdate(fsm, dimensions, fc) {
         let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
-        console.log(fsm[dimensions[0]])
         return new Promise((resolve) => {
             let state = fsm.state,
                 sqlDimensions = dimensions.map(item => {
@@ -945,9 +944,7 @@ export default Controller.extend({
         })
     },
     scatterUpdate(fsm, dimensions, fc) {
-        console.log("fsm", fsm)
-        console.log("dimensions", dimensions)
-        console.log("fc", fc)
+
         let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
 
         return new Promise((resolve) => {
