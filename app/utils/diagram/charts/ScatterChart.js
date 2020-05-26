@@ -16,15 +16,18 @@ class ScatterChart extends Histogram {
         this.fsm = null;
         // 格式化数据 -> 修改为在 queryData 之后格式化 
         // this.dataset = this.parseData(this.data.dataset);
-        let dimensions = this.dimensions, initFsmData = dimensions.reduce((acc, cur) => {
-            acc[cur] = '';
-            return acc;
-        }, {}), transitions = dimensions.map((d, i, arr) => {
-            if (i + 1 !== dimensions.length) {
-                return { name: 'drilldown', from: d, to: arr[i + 1] };
-            }
-            return { name: 'rollup', from: d, to: arr[0] };
-        });
+        let dimensions = this.dimensions, 
+            initFsmData = dimensions.reduce((acc, cur) => {
+                acc[cur] = '';
+                return acc;
+            }, {}), 
+            transitions = dimensions.map((d, i, arr) => {
+                if (i + 1 !== dimensions.length) {
+                    return { name: 'drilldown', from: d, to: arr[i + 1] };
+                }
+                return { name: 'rollup', from: d, to: arr[0] };
+            });
+            
         this.fsm = new StateMachine({
             init: dimensions[0],
             data: initFsmData,
@@ -82,8 +85,10 @@ class ScatterChart extends Histogram {
         let self = this;
         svg.selectAll('circle').on('click', function (d) {
             let curData = d;
+            let prov = d.PROVINCE;
             console.log(fsm)
             if (fsm.state === dimensions[dimensions.length - 1] || !curData) {
+                self.currentProv = "全国";
                 // TODO 当当前省份无数据时,进行 rollup 就出现错误,但是可以忽略
                 // 如果是最后一个维度,则进行清空
                 dimensions.forEach((item) => {
@@ -93,6 +98,8 @@ class ScatterChart extends Histogram {
                 self.updateChart(selection);
             }
             else {
+                self.currentProv = prov;
+                
                 fsm.drilldown();
                 dimensions.forEach((item) => {
                     fsm[item] = curData[item] || fsm[item];

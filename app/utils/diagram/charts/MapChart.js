@@ -20,6 +20,11 @@ import { formatLocale, format } from 'd3-format';
             product: "all"
         },
         {
+        
+        
+        
+        
+        
             label: '广东省',
             sales: 2194822.975,
             quote: 2643496,
@@ -195,6 +200,8 @@ class MapChart extends Histogram {
         }
         else {
             return json(`../assets/json/provinces/${fsm[dimensions[0]]}.json`).then(geoJson => {
+                
+                console.log(geoJson)
                 const projection = geoMercator()
                     .fitSize([grid.width, grid.height], geoJson);
                 const path = geoPath().projection(projection);
@@ -213,6 +220,7 @@ class MapChart extends Histogram {
                     .duration(600)
                     .attr('fill', (d) => {
                         let prov = d.properties.name;
+
                         let curProvData = dataset.find((provData) => prov.includes(provData['CITY']));
                         return color(curProvData ? curProvData[geo.dimension] : 0);
                     });

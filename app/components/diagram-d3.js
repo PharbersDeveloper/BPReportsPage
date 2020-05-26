@@ -54,7 +54,9 @@ export default Component.extend({
     },
     actions: {
         changeProv() {
+            
             let prov = this.data.histogram.currentProv;
+            console.log("changeProv", this.data)
 
             typeof this.onChangeProv === 'function' ? this.onChangeProv(prov) : null
         }
@@ -85,6 +87,7 @@ export default Component.extend({
             }
         }).then(data => {
             this.data = data
+            console.log("d3 data," , data)
             data.histogram.updateData = this.updateData.bind(this)
             data.histogram.draw(container);
         })

@@ -945,6 +945,9 @@ export default Controller.extend({
         })
     },
     scatterUpdate(fsm, dimensions, fc) {
+        console.log("fsm", fsm)
+        console.log("dimensions", dimensions)
+        console.log("fc", fc)
         let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
 
         return new Promise((resolve) => {
