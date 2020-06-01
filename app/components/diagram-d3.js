@@ -36,6 +36,7 @@ export default Component.extend({
 
     // },
     legendContent: null,
+    oldtestSimonProvince: "全国",
     didUpdateAttrs() {
         this._super(...arguments);
         let container = select(`#${this.chartId}`);
@@ -63,7 +64,11 @@ export default Component.extend({
     },
     draw() {
         let container = select(`#${this.chartId}`),
-            chartConfPromise = null;
+            chartConfPromise = null,
+            eid = this.eid,
+            cid = this.chartId,
+            oldtestSimonProvince = this.oldtestSimonProvince,
+            testSimonProvince = this.testSimonProvince;
 
         // 必须在draw 执行之前重设 updateData 的方法
         if (isEmpty(this.store)) {
@@ -89,7 +94,21 @@ export default Component.extend({
             this.data = data
             console.log("d3 data," , data)
             data.histogram.updateData = this.updateData.bind(this)
-            data.histogram.draw(container);
+            // data.histogram.draw(container)
+            // data.histogram.cid = cid
+            if (eid === "5e9fb821c44f045878415ead" && oldtestSimonProvince !== testSimonProvince) {
+                // 通过 didUpdateAttrs 触发重新绘制
+                // 修改 fsm 数据
+                // 清除原有图表
+                // 重新绘制 
+                data.histogram.fsm.PROVINCE = this.testSimonProvince.substring(0,2)
+                data.histogram.fsm.drilldown();
+                container.selectAll('svg').remove();
+                container.selectAll('div').remove();
+                data.histogram.draw(container)
+            } else {
+                data.histogram.draw(container)
+            }
         })
     },
     removeSvg(container) {
