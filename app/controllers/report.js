@@ -6,10 +6,12 @@ import { computed, observer } from "@ember/object";
 // import { isEmpty } from "@ember/utils";
 import ENV from "max-bi-v2/config/environment";
 import { format } from 'd3-format';
+import DS from 'ember-data';
 
 const { host, port } = ENV.QueryAddress;
 
 export default Controller.extend({
+    curTable: false,
     ajax: service(),
     picOSS: service("pic-oss"),
     propertiesObserver: observer("endDate", "prodName", function () {
@@ -75,12 +77,15 @@ export default Controller.extend({
     endDate: "201906",
     provName: "全国",
     cityName: "",
+    curType: "销售量",
+    curMapTableType: "市场规模",
     // ADD
     // compName: "Sankyo",
     compName: "信立泰",
     mss: A([]),
     mts: A([]),
     mcs: A([]),
+    curMapTableIndex: -1,
     tableColumns: A([
         {
             name: "药品名",
@@ -231,6 +236,56 @@ export default Controller.extend({
                 });
         }
     ),
+    mapTableTest: [0,1,2,3,4,5],
+    requestDataMapTable: async function() {
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
+        let fc = {
+                    address: "http://59.110.31.50:3000/sql",
+                    db: "cube",
+                    tag: "listMap"
+                }
+        let prodName = this.prodName
+
+        let data = await fetch(`${fc.address}?tag=${fc.tag}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "sql": `SELECT PROVINCE, SALES_VALUE, SALES_QTY,PROD_EI, GEO_EI, PROD_SALES, SALES_VALUE_GROWTH_RATE,SALES_QTY_GROWTH_RATE,FATHER_GEO_SALES_VALUE_GROWTH_RATE,PROD_SHARE FROM cube WHERE DIMENSION_NAME = '3-time-geo-prod' AND DIMENSION_VALUE = 'MONTH-PROVINCE-PRODUCT_NAME' AND PRODUCT_NAME = '${prodName}' AND COMPANY = '信立泰' AND COUNTRY = 'CHINA' AND YEAR = 2019 AND MONTH = 11` }),
+        })
+
+        let r = await data.json()
+        console.log("~~", r)
+        return r
+    },
+    testDataL: null,
+    mapTable: computed(async function() {       
+        let { comp, prov, prod, endDate } = this.getProperties("comp", "prov", "prod", "endDate");
+        let that = this
+        let fc = {
+                    address: "http://59.110.31.50:3000/sql",
+                    db: "cube",
+                    tag: "listMap"
+                }
+        let prodName = this.prodName
+
+        let data = await fetch(`${fc.address}?tag=${fc.tag}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "sql": `SELECT PROVINCE, SALES_VALUE, SALES_QTY,PROD_EI, GEO_EI, PROD_SALES, SALES_VALUE_GROWTH_RATE,SALES_QTY_GROWTH_RATE,FATHER_GEO_SALES_VALUE_GROWTH_RATE,PROD_SHARE FROM cube WHERE DIMENSION_NAME = '3-time-geo-prod' AND DIMENSION_VALUE = 'MONTH-PROVINCE-PRODUCT_NAME' AND PRODUCT_NAME = '${prodName}' AND COMPANY = '信立泰' AND COUNTRY = 'CHINA' AND YEAR = 2019 AND MONTH = 11` }),
+        })
+
+        let r = await data.json()
+        console.log("?", r)
+        return this.requestDataMapTable().then(data => {
+            console.log(data)
+            that.set("testDataL", data)
+            return data
+        })
+        
+    }),
     /**
         async firstLineQuery(condition, data) {
             const queryConfig = condition.query;
@@ -998,6 +1053,29 @@ export default Controller.extend({
         this.set("endDate", year + (month < 10 ? "0" + month : month));
     },
     actions: {
+        showEI(index) {
+            if ( this.get("curMapTableIndex") === -1 ) {
+                this.set("curMapTableIndex", index)
+            } else {
+                this.set("curMapTableIndex", -1)
+            }
+        },
+        setMapTableType(value, fn) {
+            if (fn instanceof Function) {
+                fn()
+            }
+            this.set("curMapTableType", value)
+        },
+        setValue(value, fn) {
+            if (fn instanceof Function) {
+                fn()
+            }
+            this.set("curType", value)
+        },
+        upToTop() {
+            document.documentElement.scrollTop = 0
+            document.body.scrollTop = 0
+        },
         changeProv(prov) {
             this.set("provName", prov);
 
