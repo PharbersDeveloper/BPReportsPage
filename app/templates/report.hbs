@@ -1,5 +1,6 @@
 <div class="bp-report">
   {{#bp-column-layout classNames="report-container"}}
+    {{!-- 第一行 --}}
     {{#bp-row-layout
       classNames="report-header"
       mainAxis="main-space-between"
@@ -19,20 +20,21 @@
       }} --}}
 
       {{#bp-row-layout classNames="bg-transparent"}}
-      {{max-data-picker classNames="mr-2"}}
+        {{max-data-picker classNames="mr-2"}}
         
-          {{#bp-select iconClass="icon-white"  classNames="bp-report-header-select"  choosedValue=curType as |s| }}
-            {{bp-option icon='' text="销售量"   onClick=(action "setValue" "销售量" s.onChange) choosedValue=curType}}
-            {{bp-option icon='' text="销售额"   onClick=(action "setValue" "销售额" s.onChange) choosedValue=curType}}
+        {{#bp-select iconClass="icon-white"  classNames="bp-report-header-select"  choosedValue=curType as |s| }}
+          {{bp-option icon='' text="销售量"   onClick=(action "setValue" "销售量" s.onChange) choosedValue=curType}}
+          {{bp-option icon='' text="销售额"   onClick=(action "setValue" "销售额" s.onChange) choosedValue=curType}}
         {{/bp-select}}
-        {{/bp-row-layout}}
+      {{/bp-row-layout}}
 
       {{!-- {{#bp-select iconClass="select-languang-icon"  classNames="select-language"  choosedValue=curLanguage as |s| }}
             {{bp-option icon='' text=(t "siteMap.ZH") onClick=(action "setZH" s.onChange)  choosedValue=curLanguage}}
             {{bp-option icon='' text=(t "siteMap.EN") onClick=(action "setEN" s.onChange)  choosedValue=curLanguage}}
         {{/bp-select}} --}}
-
     {{/bp-row-layout}}
+    
+    {{!-- 第二行 --}}
     {{#bp-row-layout
       classNames="report-scrollview"
       mainAxis="main-center"
@@ -57,6 +59,7 @@
                 {{item.PRODUCT_NAME}}
               {{/bp-text}}
               {{#bp-row-layout classNames="report-product-content"}}
+                {{!-- EI 95.48 --}}
                 {{#bp-column-layout classNames="product-ei-box"}}
                   {{#bp-text classNames="heading-xsmall product-ei-text"}}
                     EI
@@ -65,22 +68,19 @@
                     {{h-format-percentage item.EI 2}}
                   {{/bp-text}}
                 {{/bp-column-layout}}
+                {{!-- 产品销量。。。 --}}
                 {{#bp-column-layout classNames="product-sales-box"}}
                   {{#bp-row-layout classNames="product-sales-text-box"}}
                     {{#bp-text classNames="heading-xsmall product-sales-text"}}
                       产品销量
                     {{/bp-text}}
-                    {{bp-product-card-tag index=index type="default" subtle=true
-                    }}
+                    {{bp-product-card-tag index=index type="default" subtle=true}}
                   {{/bp-row-layout}}
                   {{#bp-row-layout classNames="product-sales-data-box"}}
-                    {{#bp-text
-                      classNames="heading-medium product-sales-sata-number"
-                    }}
+                    {{#bp-text classNames="heading-medium product-sales-sata-number"}}
                       {{h-format-mn item.PROD_SALES}}
-                    {{/bp-text}}{{#bp-text
-                      classNames="body-tertiary product-sales-data-mn"
-                    }}
+                    {{/bp-text}}
+                    {{#bp-text classNames="body-tertiary product-sales-data-mn"}}
                       Mn
                     {{/bp-text}}
                     {{#product-sales-data-percent value=item.MOM_RATE}}
@@ -99,44 +99,36 @@
             }}
               {{#bp-text classNames="product-card-title"}}
                 {{item.PRODUCT_NAME}}
-              {{/bp-text}}{{#bp-row-layout classNames="report-product-content"}}
+              {{/bp-text}}
+              {{#bp-row-layout classNames="report-product-content"}}
+                {{!-- EI 95.48 --}}
                 {{#bp-column-layout classNames="product-ei-box"}}
                   {{#bp-text classNames="heading-xsmall product-ei-text"}}
                     EI
-                  {{/bp-text}}{{#bp-text classNames="title product-ei-data"}}
+                  {{/bp-text}}
+                  {{#bp-text classNames="title product-ei-data"}}
                     {{h-format-percentage item.EI 2}}
                   {{/bp-text}}
-                {{/bp-column-layout}}{{#bp-column-layout
-                  classNames="product-sales-box"
-                }}
+                {{/bp-column-layout}}
+                {{!-- 产品销量。。。 --}}
+                {{#bp-column-layout classNames="product-sales-box"}}
                   {{#bp-row-layout classNames="product-sales-text-box"}}
                     {{#bp-text classNames="heading-xsmall product-sales-text"}}
                       产品销量
-                    {{/bp-text}}{{bp-product-card-tag
-                      index=index
-                      type="default"
-                      subtle=true
-                    }}
-                  {{/bp-row-layout}}{{#bp-row-layout
-                    classNames="product-sales-data-box"
-                  }}
-                    {{#bp-text
-                      classNames="heading-medium product-sales-sata-number"
-                    }}
+                    {{/bp-text}}
+                    {{bp-product-card-tag index=index type="default" subtle=true}}
+                  {{/bp-row-layout}}
+                  {{#bp-row-layout classNames="product-sales-data-box"}}
+                    {{#bp-text classNames="heading-medium product-sales-sata-number"}}
                       {{h-format-mn item.PROD_SALES}}
-                    {{/bp-text}}{{#bp-text
-                      classNames="body-tertiary product-sales-data-mn"
-                    }}
+                    {{/bp-text}}
+                    {{#bp-text classNames="body-tertiary product-sales-data-mn"}}
                       Mn
-                    {{/bp-text}}{{#product-sales-data-percent
-                      value=item.MOM_RATE
-                    }}
+                    {{/bp-text}}
+                    {{#product-sales-data-percent value=item.MOM_RATE}}
                       {{h-format-percentage item.MOM_RATE 2}}%
-                    {{/product-sales-data-percent}}{{bp-icon
-                      value=item.MOM_RATE
-                      color=null
-                      iconSmall=true
-                    }}
+                    {{/product-sales-data-percent}}
+                    {{bp-icon value=item.MOM_RATE color=null iconSmall=true}}
                   {{/bp-row-layout}}
                 {{/bp-column-layout}}
               {{/bp-row-layout}}
@@ -146,24 +138,20 @@
       {{/bp-viewport}}
     {{/bp-row-layout}}
     
+    {{!-- 下面所有图表部分 --}}
     {{#bp-column-layout classNames="relative-position-part"}}
-
-    {{#bp-row-layout
-      classNames="report-map-scatter mb-4 "
-      mainAxis="main-space-between"
-      crossAxis="cross-center"
-    }}
-      {{#bp-column-layout classNames="report-china-container report-china-container-map mr-4"}}
-        {{#bp-row-layout
-          classNames="report-china-title"
-          crossAxis="cross-center"
-        }}
-          {{#bp-text classNames="heading-medium chart-title"}}
-            {{prodName}} | 所在市场省份分布
-          {{/bp-text}}{{#bp-text classNames="body-secondary chart-subtitle"}}
-            {{provName}}
-          {{/bp-text}}
-        {{/bp-row-layout}}
+      {{!-- 图表第一部分 --}}
+      {{#bp-row-layout classNames="report-map-scatter mb-4" mainAxis="main-space-between" crossAxis="cross-center"}}
+        {{!-- 图表第一部分左半部分 --}}
+        {{#bp-column-layout classNames="report-china-container report-china-container-map mr-4"}}
+          {{#bp-row-layout classNames="report-china-title" crossAxis="cross-center"}}
+            {{#bp-text classNames="heading-medium chart-title"}}
+              {{prodName}} | 所在市场省份分布
+            {{/bp-text}}
+            {{#bp-text classNames="body-secondary chart-subtitle"}}
+              {{provName}}
+            {{/bp-text}}
+          {{/bp-row-layout}}
         {{!
             <p>在ember-cli-build 中添加app.import('node_modules/echarts/map/js/china.js');</p>
          }}
@@ -176,168 +164,168 @@
           compName=compName
           onChangeProv=(action "changeProv")
         }} --}}
-        {{diagram-d3
-          eid="5e9eb4f4a9d14da0d86b2adf"
-          store=this.store
-          updateData=this.mapAndScatterUpdate
-          comp=compName
-          startDate="201801"
-          endDate=endDate
-          prod=prodName
-          onChangeProv=(action "changeProv") 
-        }}
-      {{/bp-column-layout}}
-      {{#bp-column-layout classNames="report-china-container report-china-container-table"}}
-        {{#bp-row-layout mainAxis="main-space-between" classNames="report-china-table-header mb-4"}}
+          {{diagram-d3
+            eid="5e9eb4f4a9d14da0d86b2adf"
+            store=this.store
+            updateData=this.mapAndScatterUpdate
+            comp=compName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName
+            onChangeProv=(action "changeProv") 
+          }}
+        {{/bp-column-layout}}
+        
+        {{!-- 图表第一部分右半部分 --}}
+        {{#bp-column-layout classNames="report-china-container report-china-container-table"}}
+          {{!-- 第一行 --}}
+          {{#bp-row-layout mainAxis="main-space-between" classNames="report-china-table-header mb-4"}}
             {{#bp-text classNames="heading-medium chart-title"}}省份层面排名{{/bp-text}}
             {{#bp-select iconClass="icon-map-table-down"  classNames="bp-map-table-select"  choosedValue=curMapTableType as |s| }}
-            {{bp-option icon='' text="市场规模"   onClick=(action "setMapTableType" "市场规模" s.onChange) choosedValue=curMapTableType}}
-            {{bp-option icon='' text="产品销量"   onClick=(action "setMapTableType" "产品销量" s.onChange) choosedValue=curMapTableType}}
-        {{/bp-select}}
-        {{/bp-row-layout}}
-
-        {{#bp-column-layout classNames="report-map-table-scroll"}}
-        <div style="display: none;">{{mapTable}}</div>
-          {{#each testDataL as |item index|}}
-            {{#bp-row-layout classNames="rank-table-row mt-3"}}  
-            {{#bp-row-layout classNames="mr-4 cursor-pointer " click=(action "showEI" index)}}
-              {{#if (bp-eq index curMapTableIndex)}}
-                {{bp-icon iconName="down"}}
-              {{else}}
-                {{bp-icon iconName="down" classNames="icon-rotate"}}
-              {{/if}}
-            {{/bp-row-layout}}
-
-
-              
+              {{bp-option icon='' text="市场规模"   onClick=(action "setMapTableType" "市场规模" s.onChange) choosedValue=curMapTableType}}
+              {{bp-option icon='' text="产品销量"   onClick=(action "setMapTableType" "产品销量" s.onChange) choosedValue=curMapTableType}}
+            {{/bp-select}}
+          {{/bp-row-layout}}
+          {{!-- 下部分（列表） --}}
+          {{#bp-column-layout classNames="report-map-table-scroll"}}
+          <div style="display: none;">{{mapTable}}</div>
+            {{#each testDataL as |item index|}}
+              {{#bp-row-layout classNames="rank-table-row mt-3"}}  
+                {{!-- 左小按钮 --}}
+                {{#bp-row-layout classNames="mr-4 cursor-pointer " click=(action "showEI" index)}}
+                  {{#if (bp-eq index curMapTableIndex)}}
+                    {{bp-icon iconName="down"}}
+                  {{else}}
+                    {{bp-icon iconName="down" classNames="icon-rotate"}}
+                  {{/if}}
+                {{/bp-row-layout}}
+                {{!-- 中1 --}}
                 {{#bp-row-layout classNames="mr-4"}}
                   {{#bp-row-layout classNames="rank-index mr-2"}} {{index-rank index}} {{/bp-row-layout}}
                   {{#bp-row-layout classNames="rank-name"}}{{item.PROVINCE}}{{/bp-row-layout}}
+                {{/bp-row-layout}}
+                {{!-- 中2 --}}
+                {{#bp-column-layout mainAxis="main-space-between"}}
+                    {{#bp-column-layout classNames="mr-4 mb-3"}}
+                      {{#bp-text classNames="body-tertiary"}}市场规模(RMB){{/bp-text}}
+                      {{#bp-text}}0000.00(Mn){{/bp-text}}
+                    {{/bp-column-layout}}
+                  {{#if (bp-eq index curMapTableIndex)}}
+                    {{#bp-column-layout classNames="mb-3"}}
+                      {{#bp-text classNames="body-tertiary"}}EI值{{/bp-text}}
+                      {{#bp-text}}{{h-format-decimal item.PROD_EI}}{{/bp-text}}
+                    {{/bp-column-layout}}
+                  {{/if}}
+                {{/bp-column-layout}}
+                {{!-- 右 --}}
+                {{#bp-column-layout mainAxis="main-space-between"}}
+                  {{#bp-column-layout classNames="mb-3"}}
+                    {{#bp-text classNames="body-tertiary"}}产品销售额{{/bp-text}}
+                    {{#bp-text}}0000.00(Mn){{/bp-text}}
+                  {{/bp-column-layout}}
+                  {{#if (bp-eq index curMapTableIndex)}}
+                    {{#bp-column-layout classNames="mb-3"}}
+                      {{#bp-text classNames="body-tertiary"}}市场份额{{/bp-text}}
+                      {{#bp-text}}000.00%{{/bp-text}}
+                    {{/bp-column-layout}}
+                  {{/if}}
+                {{/bp-column-layout}}
               {{/bp-row-layout}}
-              
-                  {{#bp-column-layout mainAxis="main-space-between"}}
-                      {{#bp-column-layout classNames="mr-4 mb-3"}}
-                        {{#bp-text classNames="body-tertiary"}}市场规模(RMB){{/bp-text}}
-                        {{#bp-text}}0000.00(Mn){{/bp-text}}
-                      {{/bp-column-layout}}
-                    {{#if (bp-eq index curMapTableIndex)}}
-                      {{#bp-column-layout classNames="mb-3"}}
-                        {{#bp-text classNames="body-tertiary"}}EI值{{/bp-text}}
-                        {{#bp-text}}{{h-format-decimal item.PROD_EI}}{{/bp-text}}
-                      {{/bp-column-layout}}
-                    {{/if}}
-                  {{/bp-column-layout}}
-                  {{#bp-column-layout mainAxis="main-space-between"}}
-                      {{#bp-column-layout classNames="mb-3"}}
-                        {{#bp-text classNames="body-tertiary"}}产品销售额{{/bp-text}}
-                        {{#bp-text}}0000.00(Mn){{/bp-text}}
-                      {{/bp-column-layout}}
-                      {{#if (bp-eq index curMapTableIndex)}}
-                      {{#bp-column-layout classNames="mb-3"}}
-                        {{#bp-text classNames="body-tertiary"}}市场份额{{/bp-text}}
-                        {{#bp-text}}000.00%{{/bp-text}}
-                      {{/bp-column-layout}}
-                      {{/if}}
-                  {{/bp-column-layout}}
-            {{/bp-row-layout}}
             {{/each}}
+          {{/bp-column-layout}}
         {{/bp-column-layout}}
-      {{/bp-column-layout}}
-    
-    {{/bp-row-layout}}
+      
+      {{/bp-row-layout}}
   
-        {{#bp-row-layout
+      {{!-- 图表第二部分 --}}
+      {{#bp-row-layout
       classNames="report-map-scatter mb-4"
       mainAxis="main-space-between"
       crossAxis="cross-center"
-    }}
-    {{#bp-column-layout classNames="report-scatter-container"}}
-        {{#bp-row-layout
-          classNames="report-scatter-title"
-          crossAxis="cross-center"
-        }}
-          {{#bp-text classNames="heading-medium chart-title"}}
-            {{prodName}} | 所在市场城市概况
-          {{/bp-text}}
-          {{#bp-text classNames="body-secondary chart-subtitle"}}
-            {{provName}}
-          {{/bp-text}}
-        {{/bp-row-layout}}
-        {{!-- {{bp-scatter
-          eid="5e15cc6a0f84221d01409e89"
-          store=this.store
-          startDate=startDate
-          endDate=endDate
-          currentProv=provName
-          compName=compName
-          onChangeCity=(action "changeCity")
-          confReqAdd="http://127.0.0.1:5555"
-        }} --}}
-        {{!-- 气泡图 --}}
-        {{diagram-d3
-          eid="5e9fb821c44f045878415ead"
-          store=this.store
-          updateData=this.scatterUpdate
-          comp=compName
-          startDate="201801"
-          endDate=endDate
-          prod=prodName
-          testSimonProvince=provName 
-        }}
-      {{/bp-column-layout}}
-    {{/bp-row-layout}}
-    
-    {{#bp-row-layout mainAxis="main-center" classNames="btn-group-container"}}
-        {{#bp-button-group }}
-          {{#bp-button-item text="市场图表" icon="icon_graph-bar" iconActiveClass="button-active-icon" click=(action (mut curTable) false)  active=(bp-inverse curTable)}}{{/bp-button-item}}
-          {{#bp-button-item text="详情表格" icon="icon_table" iconActiveClass="button-active-icon" click=(action (mut curTable) true)  active=curTable}}{{/bp-button-item}}
-        {{/bp-button-group}}
-    {{/bp-row-layout}}
-
-
-    {{#if curTable}} 
-          {{#bp-row-layout
-      classNames="report-table-bars"
-      mainAxis="main-space-between"
-      crossAxis="cross-flex-start"
-    }}
-      {{#bp-column-layout classNames="report-table-container"}}
-        {{#bp-column-layout
-          classNames="table-title-container"
-          mainAxis="main-center"
-        }}
-          {{#bp-text tagName="h3" classNames="heading-medium china-title"}}
-            产品地域发展详情
-          {{/bp-text}}{{#bp-text
-            tagName="p"
-            classNames="body-secondary table-subtitle"
+      }}
+        {{#bp-column-layout classNames="report-scatter-container"}}
+          {{!-- title --}}
+          {{#bp-row-layout classNames="report-scatter-title" crossAxis="cross-center"}}
+            {{#bp-text classNames="heading-medium chart-title"}}
+              {{prodName}} | 所在市场城市概况
+            {{/bp-text}}
+            {{#bp-text classNames="body-secondary chart-subtitle"}}
+              {{provName}}
+            {{/bp-text}}
+          {{/bp-row-layout}}
+          {{!-- {{bp-scatter
+            eid="5e15cc6a0f84221d01409e89"
+            store=this.store
+            startDate=startDate
+            endDate=endDate
+            currentProv=provName
+            compName=compName
+            onChangeCity=(action "changeCity")
+            confReqAdd="http://127.0.0.1:5555"
+          }} --}}
+          {{!-- 气泡图 --}}
+          {{diagram-d3
+            eid="5e9fb821c44f045878415ead"
+            store=this.store
+            updateData=this.scatterUpdate
+            comp=compName
+            startDate="201801"
+            endDate=endDate
+            prod=prodName
+            testSimonProvince=provName 
           }}
-            全国
-            {{#unless (bp-eq provName "全国")}}
-              ·{{provName}}
-            {{/unless}}
-            {{#unless (bp-eq cityName "")}}
-              ·{{cityName}}
-            {{/unless}}
-          {{/bp-text}}
         {{/bp-column-layout}}
-        {{bp-table
-          confReqAdd="http://127.0.0.1:5555"
-          classNames="report-table-content"
-          tid="bp-table-test"
-          border=false
-          tableData=tableData
-        }}
-            {{!--{{bp-table  classNames=""  tid="bp-table-test" confReqAdd="" border="false"}}--}}
-
-      {{/bp-column-layout}}
       {{/bp-row-layout}}
-    {{else}}
+    
+      {{#bp-row-layout mainAxis="main-center" classNames="btn-group-container"}}
+          {{#bp-button-group }}
+            {{#bp-button-item text="市场图表" icon="icon_graph-bar" iconActiveClass="button-active-icon" click=(action (mut curTable) false)  active=(bp-inverse curTable)}}{{/bp-button-item}}
+            {{#bp-button-item text="详情表格" icon="icon_table" iconActiveClass="button-active-icon" click=(action (mut curTable) true)  active=curTable}}{{/bp-button-item}}
+          {{/bp-button-group}}
+      {{/bp-row-layout}}
+
+
+      {{#if curTable}}
+        {{!-- 详情表格 --}}
         {{#bp-row-layout
-      classNames="report-table-bars"
-      mainAxis="main-space-between"
-      crossAxis="cross-flex-start"
-    }}
+        classNames="report-table-bars"
+        mainAxis="main-space-between"
+        crossAxis="cross-flex-start"
+        }}
+          {{#bp-column-layout classNames="report-table-container"}}
+            {{!-- title --}}
+            {{#bp-column-layout classNames="table-title-container" mainAxis="main-center"}}
+              {{#bp-text tagName="h3" classNames="heading-medium china-title"}}
+                产品地域发展详情
+              {{/bp-text}}
+              {{#bp-text tagName="p" classNames="body-secondary table-subtitle"}}
+                全国
+                {{#unless (bp-eq provName "全国")}}
+                  ·{{provName}}
+                {{/unless}}
+                {{#unless (bp-eq cityName "")}}
+                  ·{{cityName}}
+                {{/unless}}
+              {{/bp-text}}
+            {{/bp-column-layout}}
+            {{!-- 表格 --}}
+            {{bp-table
+              confReqAdd="http://127.0.0.1:5555"
+              classNames="report-table-content"
+              tid="bp-table-test"
+              border=false
+              tableData=tableData
+            }}
+              {{!--{{bp-table  classNames=""  tid="bp-table-test" confReqAdd="" border="false"}}--}}
+          {{/bp-column-layout}}
+        {{/bp-row-layout}}
+      {{else}}
+        {{!-- 市场图表 --}}
+        {{#bp-row-layout
+        classNames="report-table-bars"
+        mainAxis="main-space-between"
+        crossAxis="cross-flex-start"
+        }}
       {{!-- {{#bp-column-layout classNames="report-table-container"}}
         {{#bp-column-layout
           classNames="table-title-container"
@@ -370,219 +358,211 @@
        --}}
 
       
-      {{#bp-column-layout
-        classNames="report-bars-container"
-      }}
-        {{#bp-column-layout classNames="chart-title-container mb-2"}}
-             {{#bp-text classNames="heading-medium bars-title"}}
-              {{prodName}} | 市场规模与产品销量发展情况
-            {{/bp-text}}
-            {{#bp-text
-              classNames=" body-secondary bars-subtitle"
-            }}
-              全国
-              {{#unless (bp-eq provName "全国")}}
-                ·{{provName}}
-              {{/unless}}
-              {{#unless (bp-eq cityName "")}}
-                ·{{cityName}}
-              {{/unless}}
-            {{/bp-text}}
-        {{/bp-column-layout}}
-        {{#bp-column-layout classNames="bars-content"}}
-          {{#bp-column-layout
-            classNames="bars-title-container"
-            mainAxis="main-center"
-          }}
-            {{#bp-text classNames="heading-medium bars-title"}}
-              市场及产品增长趋势
-            {{/bp-text}}
-            {{!-- {{#bp-text
-              tagName="p"
-              classNames=" body-secondary bars-subtitle"
-            }}
-              全国
-              {{#unless (bp-eq provName "全国")}}
-                ·{{provName}}
-              {{/unless}}
-              {{#unless (bp-eq cityName "")}}
-                ·{{cityName}}
-              {{/unless}}
-            {{/bp-text}} --}}
+          {{#bp-column-layout classNames="report-bars-container"}}
+            {{!-- title --}}
+            {{#bp-column-layout classNames="chart-title-container mb-2"}}
+              {{#bp-text classNames="heading-medium bars-title"}}
+                {{prodName}} | 市场规模与产品销量发展情况
+              {{/bp-text}}
+              {{#bp-text classNames=" body-secondary bars-subtitle"}}
+                全国
+                {{#unless (bp-eq provName "全国")}}
+                  ·{{provName}}
+                {{/unless}}
+                {{#unless (bp-eq cityName "")}}
+                  ·{{cityName}}
+                {{/unless}}
+              {{/bp-text}}
+            {{/bp-column-layout}}
+            {{!-- 表1 --}}
+            {{#bp-column-layout classNames="bars-content"}}
+              {{#bp-column-layout classNames="bars-title-container" mainAxis="main-center"}}
+                {{#bp-text classNames="heading-medium bars-title"}}
+                  市场及产品增长趋势
+                {{/bp-text}}
+                {{!-- {{#bp-text
+                  tagName="p"
+                  classNames=" body-secondary bars-subtitle"
+                }}
+                  全国
+                  {{#unless (bp-eq provName "全国")}}
+                    ·{{provName}}
+                  {{/unless}}
+                  {{#unless (bp-eq cityName "")}}
+                    ·{{cityName}}
+                  {{/unless}}
+                {{/bp-text}} --}}
+              {{/bp-column-layout}}
+              {{!-- {{bp-stack
+                classNames="chart-bar-content"
+                store=this.store
+                eid="5e15cd240f84221d01409e96"
+                confReqAdd="http://127.0.0.1:5555"
+                compName=compName
+                provName=provName
+                cityName=cityName
+                startDate="201801"
+                endDate=endDate
+                prodName=prodName
+                chartData=firstStackQuery
+              }} --}}
+              {{diagram-d3
+                classNames="chart-bar-content"
+                eid="5e9fe691c44f045878415eae"
+                store=this.store
+                updateData=this.firstStackUpdate
+                comp=compName
+                startDate="201801"
+                endDate=endDate
+                prod=prodName
+                testSimonProvince=provName
+              }}
+            {{/bp-column-layout}}
+            {{!-- 表2 --}}
+            {{#bp-column-layout classNames="bars-content"}}
+              {{#bp-column-layout classNames="bars-title-container" mainAxis="main-center"}}
+                {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+                  同市场 分子竞争趋势
+                {{/bp-text}}
+                {{!-- {{#bp-text
+                  tagName="p"
+                  classNames=" body-secondary bars-subtitle"
+                }}
+                  全国
+                  {{#unless (bp-eq provName "全国")}}
+                    ·{{provName}}
+                  {{/unless}}
+                  {{#unless (bp-eq cityName "")}}
+                    ·{{cityName}}
+                  {{/unless}}
+                {{/bp-text}} --}}
+              {{/bp-column-layout}}
+              {{!-- {{bp-line
+                classNames="chart-bar-content"
+                store=this.store
+                eid="5e15cd7e0f84221d01409ea3"
+                confReqAdd="http://127.0.0.1:5555"
+                provName=provName
+                cityName=cityName
+                compName=compName
+                startDate="201801"
+                endDate=endDate
+                prodName=prodName
+                chartData=firstLineQuery
+              }} --}}
+              {{diagram-d3
+                classNames="chart-bar-content"
+                eid="5e9ffb16c44f045878415eaf"
+                store=this.store
+                updateData=this.firstLineUpdate
+                comp=compName
+                startDate="201801"
+                endDate=endDate
+                prod=prodName
+                legendContent=this.lineLegendContent
+                testSimonProvince=provName
+              }}
+            {{/bp-column-layout}}
+            {{!-- 表3 --}}
+            {{#bp-column-layout classNames="bars-content"}}
+              {{#bp-column-layout classNames="bars-title-container" mainAxis="main-center"}}
+                {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+                  同市场 产品竞争趋势
+                {{/bp-text}}
+                {{!-- {{#bp-text
+                  tagName="p"
+                  classNames=" body-secondary bars-subtitle"
+                }}
+                  全国
+                  {{#unless (bp-eq provName "全国")}}
+                    ·{{provName}}
+                  {{/unless}}
+                  {{#unless (bp-eq cityName "")}}
+                    ·{{cityName}}
+                  {{/unless}}
+                {{/bp-text}} --}}
+              {{/bp-column-layout}}
+              {{!-- {{bp-stack
+                classNames="chart-bar-content"
+                store=this.store
+                eid="5e15cd830f84221d01409ea4"
+                confReqAdd="http://127.0.0.1:5555"
+                compName=compName
+                provName=provName
+                cityName=cityName
+                startDate="201801"
+                endDate=endDate
+                prodName=prodName
+                chartData=secondStackQuery
+              }} --}}
+              {{diagram-d3
+                classNames="chart-bar-content"
+                eid="5ea01392c44f045878415eb0"
+                store=this.store
+                updateData=this.secondStackUpdate
+                comp=compName
+                startDate="201801"
+                endDate=endDate
+                prod=prodName
+                legendContent=secondStackLegendContent
+                testSimonProvince=provName
+              }}
+            {{/bp-column-layout}}
+            {{!-- 表4 --}}
+            {{#bp-column-layout classNames="bars-content"}}
+              {{#bp-column-layout classNames="bars-title-container" mainAxis="main-center"}}
+                {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
+                  同分子 产品竞争趋势
+                {{/bp-text}}
+                {{!-- {{#bp-text
+                  tagName="p"
+                  classNames=" body-secondary bars-subtitle"
+                }}
+                  全国
+                  {{#unless (bp-eq provName "全国")}}
+                    ·{{provName}}
+                  {{/unless}}
+                  {{#unless (bp-eq cityName "")}}
+                    ·{{cityName}}
+                  {{/unless}}
+                {{/bp-text}} --}}
+              {{/bp-column-layout}}
+              {{!-- {{bp-line
+                classNames="chart-bar-content"
+                store=this.store
+                eid="5e15cd870f84221d01409ea5"
+                confReqAdd="http://127.0.0.1:5555"
+                compName=compName
+                provName=provName
+                cityName=cityName
+                startDate="201801"
+                endDate=endDate
+                prodName=prodName
+                chartData=secondLineQuery
+              }} --}}
+              {{diagram-d3
+                classNames="chart-bar-content"
+                eid="5ea023e1c44f045878415eb1"
+                store=this.store
+                updateData=this.secondLineUpdate
+                comp=compName
+                startDate="201801"
+                endDate=endDate
+                prod=prodName
+                legendContent=secondLineLegendContent
+                testSimonProvince=provName
+              }}
+            {{/bp-column-layout}}
+            
           {{/bp-column-layout}}
-          {{!-- {{bp-stack
-            classNames="chart-bar-content"
-            store=this.store
-            eid="5e15cd240f84221d01409e96"
-            confReqAdd="http://127.0.0.1:5555"
-            compName=compName
-            provName=provName
-            cityName=cityName
-            startDate="201801"
-            endDate=endDate
-            prodName=prodName
-            chartData=firstStackQuery
-          }} --}}
-          {{diagram-d3
-            classNames="chart-bar-content"
-            eid="5e9fe691c44f045878415eae"
-            store=this.store
-            updateData=this.firstStackUpdate
-            comp=compName
-            startDate="201801"
-            endDate=endDate
-            prod=prodName
-            testSimonProvince=provName
-          }}
-        {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
-          {{#bp-column-layout
-            classNames="bars-title-container"
-            mainAxis="main-center"
-          }}
-            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
-              同市场 分子竞争趋势
-            {{/bp-text}}
-            {{!-- {{#bp-text
-              tagName="p"
-              classNames=" body-secondary bars-subtitle"
-            }}
-              全国
-              {{#unless (bp-eq provName "全国")}}
-                ·{{provName}}
-              {{/unless}}
-              {{#unless (bp-eq cityName "")}}
-                ·{{cityName}}
-              {{/unless}}
-            {{/bp-text}} --}}
-          {{/bp-column-layout}}
-          {{!-- {{bp-line
-            classNames="chart-bar-content"
-            store=this.store
-            eid="5e15cd7e0f84221d01409ea3"
-            confReqAdd="http://127.0.0.1:5555"
-            provName=provName
-            cityName=cityName
-            compName=compName
-            startDate="201801"
-            endDate=endDate
-            prodName=prodName
-            chartData=firstLineQuery
-          }} --}}
-          {{diagram-d3
-            classNames="chart-bar-content"
-            eid="5e9ffb16c44f045878415eaf"
-            store=this.store
-            updateData=this.firstLineUpdate
-            comp=compName
-            startDate="201801"
-            endDate=endDate
-            prod=prodName
-            legendContent=this.lineLegendContent
-            testSimonProvince=provName
-          }}
-        {{/bp-column-layout}}
-        {{#bp-column-layout classNames="bars-content"}}
-          {{#bp-column-layout
-            classNames="bars-title-container"
-            mainAxis="main-center"
-          }}
-            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
-              同市场 产品竞争趋势
-            {{/bp-text}}
-            {{!-- {{#bp-text
-              tagName="p"
-              classNames=" body-secondary bars-subtitle"
-            }}
-              全国
-              {{#unless (bp-eq provName "全国")}}
-                ·{{provName}}
-              {{/unless}}
-              {{#unless (bp-eq cityName "")}}
-                ·{{cityName}}
-              {{/unless}}
-            {{/bp-text}} --}}
-          {{/bp-column-layout}}
-          {{!-- {{bp-stack
-            classNames="chart-bar-content"
-            store=this.store
-            eid="5e15cd830f84221d01409ea4"
-            confReqAdd="http://127.0.0.1:5555"
-            compName=compName
-            provName=provName
-            cityName=cityName
-            startDate="201801"
-            endDate=endDate
-            prodName=prodName
-            chartData=secondStackQuery
-          }} --}}
-          {{diagram-d3
-            classNames="chart-bar-content"
-            eid="5ea01392c44f045878415eb0"
-            store=this.store
-            updateData=this.secondStackUpdate
-            comp=compName
-            startDate="201801"
-            endDate=endDate
-            prod=prodName
-            legendContent=secondStackLegendContent
-            testSimonProvince=provName
-          }}
-        {{/bp-column-layout}}{{#bp-column-layout classNames="bars-content"}}
-          {{#bp-column-layout
-            classNames="bars-title-container"
-            mainAxis="main-center"
-          }}
-            {{#bp-text tagName="h3" classNames="heading-medium bars-title"}}
-              同分子 产品竞争趋势
-            {{/bp-text}}
-            {{!-- {{#bp-text
-              tagName="p"
-              classNames=" body-secondary bars-subtitle"
-            }}
-              全国
-              {{#unless (bp-eq provName "全国")}}
-                ·{{provName}}
-              {{/unless}}
-              {{#unless (bp-eq cityName "")}}
-                ·{{cityName}}
-              {{/unless}}
-            {{/bp-text}} --}}
-          {{/bp-column-layout}}
-          {{!-- {{bp-line
-            classNames="chart-bar-content"
-            store=this.store
-            eid="5e15cd870f84221d01409ea5"
-            confReqAdd="http://127.0.0.1:5555"
-            compName=compName
-            provName=provName
-            cityName=cityName
-            startDate="201801"
-            endDate=endDate
-            prodName=prodName
-            chartData=secondLineQuery
-          }} --}}
-          {{diagram-d3
-            classNames="chart-bar-content"
-            eid="5ea023e1c44f045878415eb1"
-            store=this.store
-            updateData=this.secondLineUpdate
-            comp=compName
-            startDate="201801"
-            endDate=endDate
-            prod=prodName
-            legendContent=secondLineLegendContent
-            testSimonProvince=provName
-          }}
-        {{/bp-column-layout}}
-      {{/bp-column-layout}}
-    {{/bp-row-layout}}
-    {{/if}}
-
-    {{#bp-row-layout classNames="report-up-top-container mb-4" mainAxis="main-center"}}
-        {{#bp-row-layout click=(action "upToTop") classNames="report-up-top-btn cursor-pointer" crossAxis="cross-center" mainAxis="main-center"}}
-          {{bp-icon iconName="down" iconSmall=false classNames="report-up-top-icon"}}
         {{/bp-row-layout}}
-    {{/bp-row-layout}}
+      {{/if}}
+      {{!-- 返回顶部pic --}}
+      {{#bp-row-layout classNames="report-up-top-container mb-4" mainAxis="main-center"}}
+          {{#bp-row-layout click=(action "upToTop") classNames="report-up-top-btn cursor-pointer" crossAxis="cross-center" mainAxis="main-center"}}
+            {{bp-icon iconName="down" iconSmall=false classNames="report-up-top-icon"}}
+          {{/bp-row-layout}}
+      {{/bp-row-layout}}
     {{/bp-column-layout}}
   {{/bp-column-layout}}
 </div>
